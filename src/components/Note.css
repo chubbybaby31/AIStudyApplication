@@ -1,0 +1,11 @@
+.note-page {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: space-between;
+}
+.left-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}

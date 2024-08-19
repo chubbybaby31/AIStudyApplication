@@ -1,19 +1,20 @@
+* {
+  font-family: sans-serif;
+  margin: 0;
+}
+
 .app {
     display: flex;
     flex-direction: column;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    background-color: #eaedf7;
   }
   
   @media (min-width: 768px) {
     .app {
       flex-direction: row;
     }
-  }
-  
-  .note-entry,
-  .mcq-container {
-    flex: 1;
-    margin: 10px;
   }

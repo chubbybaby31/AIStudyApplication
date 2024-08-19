@@ -31,18 +31,3 @@
   .bot {
     text-align: left;
   }
-  
-  input[type="text"] {
-    width: calc(100% - 60px);
-    padding: 10px;
-    border: none;
-    border-top: 1px solid #ccc;
-  }
-  
-  button {
-    width: 50px;
-    border: none;
-    background-color: #007bff;
-    color: #fff;
-    cursor: pointer;
-  }

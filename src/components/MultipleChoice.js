@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import './MultipleChoice.css';
+import React, { useState, useEffect } from 'react'
+import './MultipleChoice.css'
 
 const MultipleChoice = ({ note, setCurrentQuestion, answersSelected, setAnswersSelected }) => {
-  const [startMCQ, setStartMCQ] = useState(false);
-  const [chatHistory, setChatHistory] = useState([]);
-  const [question, setQuestion] = useState({ Question: null });
-  const [correctAnswer, setCorrectAnswer] = useState('');
-  const [isCorrect, setIsCorrect] = useState(null);
-  const [questionResult, setQuestionResult] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [fetchNewQuestion, setFetchNewQuestion] = useState(false); // New state to control fetching
-  const numToChar = ['A', 'B', 'C', 'D'];
+  const [startMCQ, setStartMCQ] = useState(false)
+  const [chatHistory, setChatHistory] = useState([])
+  const [question, setQuestion] = useState({ Question: null })
+  const [correctAnswer, setCorrectAnswer] = useState('')
+  const [isCorrect, setIsCorrect] = useState(null)
+  const [questionResult, setQuestionResult] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [fetchNewQuestion, setFetchNewQuestion] = useState(false)
+  const numToChar = ['A', 'B', 'C', 'D']
 
-  let messageSent = "";
-  let inQuestion = true;
+  let messageSent = ""
+  let inQuestion = true
 
   const getInitialQuestions = async () => {
     try {
@@ -26,15 +26,15 @@ const MultipleChoice = ({ note, setCurrentQuestion, answersSelected, setAnswersS
         headers: {
           'Content-Type': 'application/json',
         },
-      };
+      }
       messageSent =  'Here are the notes, now provide one question: ' + note
-      const response = await fetch('http://localhost:8000/gemini', options);
-      const q = await response.text();
-      setQuestion(JSON.parse(q));
+      const response = await fetch('http://localhost:8000/gemini', options)
+      const q = await response.text()
+      setQuestion(JSON.parse(q))
     } catch (error) {
-      setQuestion({ Question: null });
+      setQuestion({ Question: null })
     }
-  };
+  }
 
   const getNewQuestion = async () => {
     try {
@@ -47,15 +47,15 @@ const MultipleChoice = ({ note, setCurrentQuestion, answersSelected, setAnswersS
         headers: {
           'Content-Type': 'application/json',
         },
-      };
+      }
       messageSent =  'NEXT QUESTION {' + questionResult + '}'
-      const response = await fetch('http://localhost:8000/gemini', options);
-      const q = await response.text();
-      setQuestion(JSON.parse(q));
+      const response = await fetch('http://localhost:8000/gemini', options)
+      const q = await response.text()
+      setQuestion(JSON.parse(q))
     } catch (error) {
-      setQuestion({ Question: null });
+      setQuestion({ Question: null })
     }
-  };
+  }
 
   // Initialize chat history when starting MCQ
   useEffect(() => {
@@ -121,31 +121,30 @@ const MultipleChoice = ({ note, setCurrentQuestion, answersSelected, setAnswersS
           role: 'model',
           parts: [{ text: 'Understood.' }],
         },
-      ];
+      ]
 
-      setChatHistory(initialChatHistory);
-      setFetchNewQuestion(true); // Trigger fetching the initial question
+      setChatHistory(initialChatHistory)
+      setFetchNewQuestion(true) // Trigger fetching the initial question
     }
-  }, [startMCQ]);
+  }, [startMCQ])
 
   // Fetch a new question when needed
   useEffect(() => {
     if (fetchNewQuestion && startMCQ) {
-      setIsLoading(true);
+      setIsLoading(true)
       if (inQuestion) {
-        getInitialQuestions(); // Fetch the initial question
+        getInitialQuestions() // Fetch the initial question
         inQuestion = false
       } else {
-        getNewQuestion(); // Fetch subsequent questions
+        getNewQuestion() // Fetch subsequent questions
       }
-      setFetchNewQuestion(false); // Reset the flag after fetching
+      setFetchNewQuestion(false) // Reset the flag after fetching
     }
-  }, [fetchNewQuestion, startMCQ, chatHistory.length]);
+  }, [fetchNewQuestion, startMCQ, chatHistory.length])
 
   // Update chat history and fetch new question based on user interaction
   useEffect(() => {
     if (question['Question']) {
-        console.log(question);
             setCurrentQuestion(question)
             setChatHistory((oldChatHistory) => [
             ...oldChatHistory,
@@ -157,45 +156,45 @@ const MultipleChoice = ({ note, setCurrentQuestion, answersSelected, setAnswersS
             role: 'model',
             parts: [{ text: JSON.stringify(question) }],
             },
-        ]);
+        ])
 
         for (let i = 0; i < 4; i++) {
             if (question['Choices'][i]['correct']) {
-                setCorrectAnswer(numToChar[i]);
+                setCorrectAnswer(numToChar[i])
             }
         }
-        setIsCorrect(null);
-        setAnswersSelected([]);
-        setQuestionResult('');
-        setIsLoading(false);
+        setIsCorrect(null)
+        setAnswersSelected([])
+        setQuestionResult('')
+        setIsLoading(false)
     }
-  }, [question]);
+  }, [question])
 
   const checkCorrect = () => {
-    const radios = document.getElementsByName('choice');
+    const radios = document.getElementsByName('choice')
     for (let y = 0; y < radios.length; y++) {
       if (radios[y].checked && radios[y].value === correctAnswer) {
-        setIsCorrect(true);
-        setAnswersSelected((oldAnswersSelected) => [...oldAnswersSelected, radios[y].value]);
+        setIsCorrect(true)
+        setAnswersSelected((oldAnswersSelected) => [...oldAnswersSelected, radios[y].value])
         if (questionResult === '') {
-          setQuestionResult('CORRECT');
+          setQuestionResult('CORRECT')
         }
-        return;
+        return
       } else if (radios[y].checked && radios[y].value !== correctAnswer) {
-        setIsCorrect(false);
-        setAnswersSelected((oldAnswersSelected) => [...oldAnswersSelected, radios[y].value]);
+        setIsCorrect(false)
+        setAnswersSelected((oldAnswersSelected) => [...oldAnswersSelected, radios[y].value])
         if (questionResult === '') {
-          setQuestionResult('INCORRECT');
+          setQuestionResult('INCORRECT')
         }
-        return;
+        return
       }
     }
-    setIsCorrect(null);
-  };
+    setIsCorrect(null)
+  }
 
   const handleNext = () => {
-    setFetchNewQuestion(true); // Set the flag to fetch a new question
-  };
+    setFetchNewQuestion(true) // Set the flag to fetch a new question
+  }
 
   return (
     <div>
@@ -320,7 +319,7 @@ const MultipleChoice = ({ note, setCurrentQuestion, answersSelected, setAnswersS
         </button>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default MultipleChoice;
+export default MultipleChoice

@@ -89,7 +89,8 @@ app.post('/summarize', upload.single('pdf'), async (req, res) => {
             { text: `Can you create a detailed summary of this document making sure not to leave out any important equations and/or vocabulary terms. 
             The summary should be a body of text that can be seperated by main ideas, but it should not be bullet points.
             Make sure all the core concepts are mentioned. This should be as if you are a teacher who is teaching a struggling student about the topic. 
-            Make sure the summary does not exceed the length of the 800 words and the length of the text in the document.
+            Make sure the summary does not exceed the length of the 500 words and the length of the text in the document. 
+            Essentially, the summary should not be more than 500 words and if the pdf itself is less than 500 words than the summary should be less than the number of words in the pdf
             Do not add anything extra other than the summary. For example, do not add "sure here is a summary for you:" in your response.` }
         ])
 
@@ -118,5 +119,24 @@ app.post('/gemini', async (req, res) => {
     const text = response.text()
     res.send(text)
 })
+
+app.post('/generate-notes', async (req, res) => {
+    const { topic, subtopics, depth } = req.body;
+
+  try {
+    const prompt = `Create a set of notes on the topic of ${topic}, specifically focusing on the subtopics of ${subtopics}. The notes should be ${depth} in detail (out of basic, intermediat, and advanced).`;
+
+    const result = await model.generateContent([
+      { text: prompt }
+    ]);
+
+    const notes = result.response.text();
+
+    res.json({ notes });
+  } catch (error) {
+    console.error('Error generating notes:', error);
+    res.status(500).json({ error: 'An error occurred while generating notes.' });
+  }
+  });
 
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`))

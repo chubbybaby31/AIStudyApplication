@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import './Chatbot.css';
+import React, { useState, useEffect } from 'react'
+import './Chatbot.css'
 
 const Chatbot = ({ note, currentQuestion, answersSelected }) => {
   const [messages, setMessages] = useState([
@@ -19,17 +19,17 @@ const Chatbot = ({ note, currentQuestion, answersSelected }) => {
         role: 'model',
         parts: [{ text: 'Understood.' }],
       },
-  ]);
-  const [input, setInput] = useState('');
+  ])
+  const [input, setInput] = useState('')
 
   const handleInputChange = (e) => {
-    setInput(e.target.value);
-  };
+    setInput(e.target.value)
+  }
 
   const handleSendMessage = async () => {
     if (input.trim()) {
-      const userMessage = { role: 'user', parts: [{text: input}] };
-      setMessages([...messages, userMessage]);
+      const userMessage = { role: 'user', parts: [{text: input}] }
+      setMessages([...messages, userMessage])
 
       try {
         const response = await fetch('http://localhost:8000/gemini', {
@@ -39,18 +39,18 @@ const Chatbot = ({ note, currentQuestion, answersSelected }) => {
             history: messages,
             message: `Context: Note - ${note}, Current Question - ${JSON.stringify(currentQuestion)}, Answer Choices Selected Already from first to most recent - ${JSON.stringify(answersSelected)}. User Query: ${input}`
           })
-        });
+        })
 
-        const botResponse = await response.text();
-        const botMessage = { role: 'model', parts: [{text: botResponse}] };
-        setMessages([...messages, userMessage, botMessage]);
+        const botResponse = await response.text()
+        const botMessage = { role: 'model', parts: [{text: botResponse}] }
+        setMessages([...messages, userMessage, botMessage])
       } catch (error) {
-        console.error('Error communicating with chatbot:', error);
+        console.error('Error communicating with chatbot:', error)
       }
 
-      setInput('');
+      setInput('')
     }
-  };
+  }
 
   return (
     <div className="chatbot">
@@ -71,7 +71,7 @@ const Chatbot = ({ note, currentQuestion, answersSelected }) => {
         <button onClick={handleSendMessage}>Send</button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Chatbot;
+export default Chatbot

@@ -1,0 +1,54 @@
+.generate-notes-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 30vw;
+    margin: auto;
+    font-family: Arial, sans-serif;
+  }
+  
+  .generate-notes-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .generate-notes-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #666;
+  }
+  
+  .generate-notes-input, 
+  .generate-notes-select {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+
+  .generate-notes-select {
+    width: 100%;
+  }
+  
+  .generate-notes-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .generate-notes-button:hover {
+    background-color: #45a049;
+  }
+  
