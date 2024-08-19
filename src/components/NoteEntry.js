@@ -1,7 +1,13 @@
 import React from 'react';
 import './NoteEntry.css';
 
-const NoteEntry = ({ editNote, setEditNote, setCurrentLocation }) => {
+const NoteEntry = ({ editNote, setEditNote, setCurrentLocation, setIsPdfSummary }) => {
+
+    const handleSummary = () => {
+        setCurrentLocation('summary-page')
+        setIsPdfSummary(false)
+    }
+
     return (
         <div className="note-entry-container">
             <div className="note-text-box-container">
@@ -16,7 +22,7 @@ const NoteEntry = ({ editNote, setEditNote, setCurrentLocation }) => {
             </div>
             <div className="button-container">
                 <button className="lesson-button" onClick={() => setCurrentLocation('lesson-page')}>Convert to Lesson</button>
-                <button className="summary-button" onClick={() => setCurrentLocation('summary-page')}>Summarize</button>
+                <button className="summary-button" onClick={() => handleSummary()}>Summarize</button>
             </div>
         </div>
     );

@@ -2,9 +2,8 @@ import React, { useState, useRef } from "react";
 import './UploadNote.css';
 import axios from 'axios';
 
-const UploadNote = ({ setEditNote, setCurrentLocation }) => {
+const UploadNote = ({ setEditNote, setCurrentLocation, pdfFile, setPdfFile, setIsPdfSummary }) => {
 
-    const [pdfFile, setPdfFile] = useState(null);
     const [dragActive, setDragActive] = useState(false);
     const [loading, setLoading] = useState(false);
     const fileInputRef = useRef(null);
@@ -42,29 +41,6 @@ const UploadNote = ({ setEditNote, setCurrentLocation }) => {
         }
     };
 
-    const handleUploadSummarize = async () => {
-        if (!pdfFile) {
-            alert('Please select a PDF file to upload.');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('pdf', pdfFile);
-
-        try {
-            const response = await axios.post('http://localhost:8000/summarize', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-
-            setEditNote(response.data.summary);
-        } catch (error) {
-            console.error('Error uploading PDF:', error);
-            alert('An error occurred while uploading the PDF. Please try again.');
-        }
-    };
-
     const handleUploadMakeNote = async () => {
         if (!pdfFile) {
             alert('Please select a PDF file to upload.');
@@ -98,6 +74,11 @@ const UploadNote = ({ setEditNote, setCurrentLocation }) => {
         }
     };
 
+    const handleSummary = () => {
+        setIsPdfSummary(true)
+        setCurrentLocation('summary-page')
+    }
+
     return (
         <div className="upload-note-container">
             <h2 className="upload-note-title">Upload PDF to Summarize or Convert to Notes</h2>
@@ -125,7 +106,7 @@ const UploadNote = ({ setEditNote, setCurrentLocation }) => {
             </div>
             <div className="action-pdf-buttons">
                 <button className="pdf-action-button" onClick={() => setCurrentLocation('lesson-page')}>Convert to Lesson</button>
-                <button className="pdf-action-button" onClick={() => setCurrentLocation('summary-page')}>Summarize</button>
+                <button className="pdf-action-button" onClick={() => handleSummary()}>Summarize</button>
                 <button className="pdf-action-button" onClick={() => handleUploadMakeNote()}>{loading ? 'Converting...' : 'Convert to Notes'}</button>
             </div>
         </div>

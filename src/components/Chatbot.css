@@ -8,51 +8,55 @@
   width: 40vw;
   margin: auto;
   font-family: Arial, sans-serif;
-  display: flex;
-  flex-direction: column;
-  height: 80vh; /* Adjust height as needed */
+  height: 85vh; /* Adjust height as needed */
 }
 
 .chatbox {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  height: 100%; /* Fill the entire height of the chatbot */
+  border: 1px solid #ccc; 
+  border-radius: 4px; /* Rounded corners for the border */
 }
 
 .messages {
   flex: 1;
   overflow-y: auto;
-  margin-bottom: 10px;
   padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
 }
 
 .message {
   margin-bottom: 10px;
-  padding: 8px;
+  padding: 4px;
   border-radius: 4px;
 }
 
+.message p {
+  margin: 20px 0; /* Add a margin to the top and bottom of each paragraph */
+}
+
 .user {
-  background-color: #e0f7fa;
+  background-color: #faf9e0;
   align-self: flex-end;
 }
 
 .model {
-  background-color: #f1f8e9;
   align-self: flex-start;
 }
 
+.input-container {
+  display: flex;
+  padding: 10px; /* Add padding for the input area */
+}
+
 input[type="text"] {
+  flex: 1;
   padding: 10px;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 20px;
   font-size: 16px;
-  width: calc(100% - 22px); /* Adjust for padding and border */
-  margin-bottom: 10px;
   outline: none;
+  background-color: transparent;
 }
 
 button {
@@ -64,6 +68,7 @@ button {
   cursor: pointer;
   transition: background-color 0.3s ease;
   font-size: 16px;
+  margin-left: 10px; /* Space between input and button */
 }
 
 button:hover {

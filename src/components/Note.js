@@ -4,7 +4,7 @@ import NoteEntry from './NoteEntry'
 import UploadNote from './UploadNote'
 import GenerateNote from './GenerateNote'
 
-const Note = ({ savedNote, setSavedNote, setCurrentLocation }) => {
+const Note = ({ savedNote, setSavedNote, setCurrentLocation, pdfFile, setPdfFile, setIsPdfSummary }) => {
 
     return (
         <div className="note-page">
@@ -17,6 +17,9 @@ const Note = ({ savedNote, setSavedNote, setCurrentLocation }) => {
                     className="upload-note"
                     setEditNote={setSavedNote}
                     setCurrentLocation={setCurrentLocation}
+                    pdfFile={pdfFile}
+                    setPdfFile={setPdfFile}
+                    setIsPdfSummary={setIsPdfSummary}
                 />
             </div>
             <NoteEntry 
@@ -24,6 +27,7 @@ const Note = ({ savedNote, setSavedNote, setCurrentLocation }) => {
                 editNote={savedNote}
                 setEditNote={setSavedNote}
                 setCurrentLocation={setCurrentLocation}
+                setIsPdfSummary={setIsPdfSummary}
             />
         </div>
     )

@@ -91,14 +91,17 @@ app.post('/summarize', upload.single('pdf'), async (req, res) => {
             Make sure all the core concepts are mentioned. This should be as if you are a teacher who is teaching a struggling student about the topic. 
             Make sure the summary does not exceed the length of the 500 words and the length of the text in the document. 
             Essentially, the summary should not be more than 500 words and if the pdf itself is less than 500 words than the summary should be less than the number of words in the pdf
-            Do not add anything extra other than the summary. For example, do not add "sure here is a summary for you:" in your response.` }
+            Do not add anything extra other than the summary. For example, do not add "sure here is a summary for you:" in your response.
+            If necessary, format the summary into sections with subtitles. Also be sure to add proper spacing as needed.` }
         ])
 
         // Output the generated text to the console
         const summary = result.response.text()
 
         // Delete the PDF file after processing
-        fs.unlinkSync(pdfFilePath)
+        try {
+            fs.unlinkSync(pdfFilePath)
+        } catch {}
         console.log(`Deleted file: ${pdfFilePath}`)
 
         // Send the summary back to the client
