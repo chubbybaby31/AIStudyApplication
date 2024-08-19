@@ -1,25 +1,27 @@
-import logo from './logo.svg';
+import React, { useState, useEffect } from 'react';
 import './App.css';
+import NoteEntry from './components/NoteEntry';
+import MultipleChoice from './components/MultipleChoice';
+import Chatbot from './components/Chatbot';
 
-function App() {
+const App = () => {
+  const [savedNote, setSavedNote] = useState("");
+  const [currentQuestion, setCurrentQuestion] = useState("");
+  const [answersSelected, setAnswersSelected] = useState([]);
+
+  useEffect(() => {
+    console.log("change")
+    console.log(currentQuestion)
+    console.log("c")
+  }, [currentQuestion])
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app">
+      <NoteEntry savedNote={savedNote} setSavedNote={setSavedNote} />
+      <MultipleChoice note={savedNote} setCurrentQuestion={setCurrentQuestion} answersSelected={answersSelected} setAnswersSelected={setAnswersSelected} />
+      <Chatbot note={savedNote} currentQuestion={currentQuestion} answersSelected={answersSelected} />
     </div>
   );
-}
+};
 
 export default App;
