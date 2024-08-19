@@ -1,3 +1,48 @@
+.note-entry-container {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 40vw;
+    margin: auto;
+    font-family: Arial, sans-serif;
+}
+
+.note-text-box-container {
+    margin: auto;
+}
+
 .note-entry-box {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
     resize: none;
+    width: 38.5vw;
+    height: 77.5vh;
+    margin: auto;
+    outline: none;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.lesson-button,
+.summary-button {
+    padding: 10px 20px;
+    background-color: #fff42a;
+    color: black;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 13vw;
+    font-size: 16px;
+}
+
+.save-button:hover,
+.edit-button:hover {
+    background-color: #f1e726;
 }

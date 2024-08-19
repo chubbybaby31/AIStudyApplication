@@ -124,7 +124,8 @@ app.post('/generate-notes', async (req, res) => {
     const { topic, subtopics, depth } = req.body;
 
   try {
-    const prompt = `Create a set of notes on the topic of ${topic}, specifically focusing on the subtopics of ${subtopics}. The notes should be ${depth} in detail (out of basic, intermediat, and advanced).`;
+    const prompt = `Create a set of notes on the topic of ${topic}, specifically focusing on the subtopics of ${subtopics}. 
+    The notes should be ${depth} in detail (out of basic, intermediat, and advanced).`;
 
     const result = await model.generateContent([
       { text: prompt }

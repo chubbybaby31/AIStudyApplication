@@ -3,7 +3,7 @@
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 30vw;
+    width: 35vw;
     margin: auto;
     font-family: Arial, sans-serif;
   }
@@ -39,8 +39,8 @@
   .generate-notes-button {
     width: 100%;
     padding: 12px;
-    background-color: #4CAF50;
-    color: white;
+    background-color: #fff42a;
+    color: black;
     border: none;
     border-radius: 8px;
     font-size: 16px;
@@ -49,6 +49,6 @@
   }
   
   .generate-notes-button:hover {
-    background-color: #45a049;
+    background-color: #f1e726;
   }
   

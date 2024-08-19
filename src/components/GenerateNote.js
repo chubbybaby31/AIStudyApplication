@@ -43,7 +43,7 @@ const GenerateNotes = ({ setEditNote }) => {
         type="text" 
         value={topic} 
         onChange={(e) => setTopic(e.target.value)} 
-        placeholder="Rick Astley - Never Gonna Give You Up"
+        placeholder=""
       />
 
     <label className="generate-notes-label">Complexity Level</label>
@@ -64,7 +64,7 @@ const GenerateNotes = ({ setEditNote }) => {
         type="text" 
         value={subtopics} 
         onChange={(e) => setSubtopics(e.target.value)} 
-        placeholder="Music Video, Lyrics, Why it was created"
+        placeholder=""
         rows="5"
         cols="10"
       ></textarea>
@@ -73,7 +73,7 @@ const GenerateNotes = ({ setEditNote }) => {
         className="generate-notes-button" 
         onClick={handleGenerate}
       >
-        {loading ? 'Generating...' : 'Perform Request'}
+        {loading ? 'Generating...' : 'Generate'}
       </button>
     </div>
   );

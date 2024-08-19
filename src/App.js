@@ -19,7 +19,7 @@ const App = () => {
 
   return (
     <div className="app">
-      {currentLocation === 'note-page' && <Note savedNote={savedNote} setSavedNote={setSavedNote} />}
+      {currentLocation === 'note-page' && <Note savedNote={savedNote} setSavedNote={setSavedNote} setCurrentLocation={setCurrentLocation} />}
       {currentLocation === 'lesson-page' && <Lesson />}
       {currentLocation === 'summary-page' && <Summary />}
       {currentLocation === 'flash-cards-page' && <FlashCards />}

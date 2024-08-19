@@ -1,29 +1,25 @@
-import React, { useState } from 'react'
-import './NoteEntry.css'
-import axios from 'axios'
+import React from 'react';
+import './NoteEntry.css';
 
-const NoteEntry = ({ saved, setSaved, editNote, setEditNote, handleSave }) => {
-
+const NoteEntry = ({ editNote, setEditNote, setCurrentLocation }) => {
     return (
-        <div className="note-entry">
+        <div className="note-entry-container">
             <div className="note-text-box-container">
                 <textarea
                     className="note-entry-box"
                     id="note-entry-box"
-                    rows="50"
-                    cols="100"
+                    rows="10"
                     placeholder='Type your notes here...'
-                    disabled={saved}
                     onChange={(e) => setEditNote(e.target.value)}
                     value={editNote} // Controlled component
                 />
             </div>
             <div className="button-container">
-                {!saved && <button onClick={() => handleSave()}>Save</button>}
-                {saved && <button onClick={() => setSaved(false)}>Edit</button>}
+                <button className="lesson-button" onClick={() => setCurrentLocation('lesson-page')}>Convert to Lesson</button>
+                <button className="summary-button" onClick={() => setCurrentLocation('summary-page')}>Summarize</button>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default NoteEntry
+export default NoteEntry;
