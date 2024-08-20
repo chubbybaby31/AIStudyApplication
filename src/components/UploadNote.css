@@ -1,70 +1,65 @@
 .upload-note-container {
-    background-color: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 35vw;
-    height: 30vh;
-    margin: auto;
-    font-family: Arial, sans-serif;
-  }
-  
-  .upload-note-title {
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 20px;
-    text-align: center;
-  }
-  
-  .pdf-upload-container {
-    width: calc(100% - 40px);
-    height: 13.5vh;
-    padding: 20px;
-    margin-bottom: 20px;
-    border: 2px dashed #ccc;
-    border-radius: 8px;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    position: relative;
-    transition: background-color 0.3s;
-    cursor: pointer;
-  }
-  
-  .pdf-upload-container.active {
-    background-color: #f0f8ff;
-  }
-  
-  .pdf-upload-input {
-    display: none;
-  }
-  
-  .drag-drop-label {
-    font-size: 14px;
-    color: #666;
-    pointer-events: none;
-  }
-  
-  .action-pdf-buttons {
-    display: flex;
-    justify-content: space-evenly;
-    width: 100%;
-  }
-  
-  .pdf-action-button {
-    padding: 12px;
-    background-color: #fff42a;
-    color: black;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    width: 10vw;
-  }
-  
-  .pdf-action-button:hover {
-    background-color: #f1e726;
-  }
-  
+  background-color: #fff;
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 12px;
+  width: 35vw;
+  height: 30vh;
+  margin: auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  z-index: 1;
+  align-self: flex-end;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.upload-note-title {
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #333;
+}
+
+.pdf-upload-container {
+  width: calc(100% - 40px);
+  height: 13.5vh;
+  padding: 20px;
+  margin: auto;
+  border: 2px dashed #c2c2c2;
+  border-radius: 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  transition: background-color 0.3s;
+  cursor: pointer;
+  background-color: transparent;
+  backdrop-filter: blur(5px);
+}
+
+.pdf-upload-container:hover {
+  background-color: white;
+}
+
+.pdf-upload-input {
+  display: none;
+}
+
+.drag-drop-label {
+  font-size: 14px;
+  color: #666;
+  pointer-events: none;
+}
+
+.action-pdf-buttons {
+  display: flex;
+  justify-content: space-evenly;
+  width: 100%;
+  margin-top: 2vh;
+}
+
+.pdf-action-button {
+  cursor: pointer;
+  width: 100%;
+}

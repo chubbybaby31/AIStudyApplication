@@ -41,12 +41,15 @@ app.post('/makenote', upload.single('pdf'), async (req, res) => {
                     fileUri: uploadResponse.file.uri
                 }
             },
-            { text: `Can you create a summary in the form of bullet points from this document. 
+            { text: `Can you create notes in the form of bullet points from this document. 
             Of course, if the document seems like it is just a vocab list, then simply just provide the list of vocabulary in your response.
             However, if it is not, then write notes as if you were a teacher who was giving these notes to students to learn.
             Be sure to make your points cover all topics, but do not make a note about every piece of information.
             Additionally, if any equations are there, be sure to note them down in your notes as well.
-            Do not add anything extra other than the notes. For example, do not add "sure here are the notes for you:" in your response.` }
+            Do not add anything extra other than the notes. For example, do not add "sure here are the notes for you:" in your response.
+            If organization is needed, you can split the notes into subsections with subtitles, but be sure to use HTML tags/formatting to do so.
+            Make sure your response does not at all include * or # and instead uses HTML tags to convey the same formatting. To remind you: <b> or <strong> is used for bolding,
+            <li> is used for a bullet point, and <p> is used for a paragraph. Please use those tags and other HTML tags rather than the #'s and the *'s.` }
         ])
 
         // Output the generated text to the console
@@ -92,7 +95,61 @@ app.post('/summarize', upload.single('pdf'), async (req, res) => {
             Make sure the summary does not exceed the length of the 500 words and the length of the text in the document. 
             Essentially, the summary should not be more than 500 words and if the pdf itself is less than 500 words than the summary should be less than the number of words in the pdf
             Do not add anything extra other than the summary. For example, do not add "sure here is a summary for you:" in your response.
-            If necessary, format the summary into sections with subtitles. Also be sure to add proper spacing as needed.` }
+            If necessary, format the summary into sections with subtitles. Also be sure to add proper spacing as needed.
+            If organization is needed, you can split the summary into subsections with subtitles, but be sure to use HTML tags/formatting to do so.
+            Make sure your response does not at all include * or # and instead uses HTML tags to convey the same formatting. To remind you: <b> or <strong> is used for bolding,
+            <li> is used for a bullet point, and <p> is used for a paragraph. Please use those tags and other HTML tags rather than the #'s and the *'s.` }
+        ])
+
+        // Output the generated text to the console
+        const summary = result.response.text()
+
+        // Delete the PDF file after processing
+        try {
+            fs.unlinkSync(pdfFilePath)
+        } catch {}
+        console.log(`Deleted file: ${pdfFilePath}`)
+
+        // Send the summary back to the client
+        res.json({ summary })
+    } catch (error) {
+        console.error('Error processing PDF:', error)
+        res.status(500).json({ error: 'An error occurred while summarizing the PDF.' })
+    }
+})
+
+app.post('/lesson', upload.single('pdf'), async (req, res) => {
+    try {
+        // Save the PDF file to disk
+        const pdfFilePath = path.join(__dirname, req.file.originalname)
+        fs.writeFileSync(pdfFilePath, req.file.buffer)
+
+        // Upload the saved PDF file to Gemini AI
+        const uploadResponse = await fileManager.uploadFile(pdfFilePath, {
+            mimeType: 'application/pdf',
+            displayName: req.file.originalname,
+        })
+
+        console.log(`Uploaded file ${uploadResponse.file.displayName} as: ${uploadResponse.file.uri}`)
+
+        // Generate content using the uploaded file URI
+        const result = await model.generateContent([
+            {
+                fileData: {
+                    mimeType: uploadResponse.file.mimeType,
+                    fileUri: uploadResponse.file.uri
+                }
+            },
+            { text: `Can you write a detailed lesson as if you were a teacher teaching about this document. 
+            Your lesson should seemlessly transition between topics and should be written as a body of text 
+            (not bullet points, however, it can contain bullet points if necessary). Be sure to include key concepts and vocabulary, along with all important equations. 
+            Make sure to explain each concept in depth and add analogies if you think the concept you are trying to teach
+            would be too difficult to understand without one. Do not abuse the analogies though as it will become obvious.
+            Refrain from using very high level wording to make th elesson easier to understand. The lesson should be quite lengthy, longer than a summary.
+            It must be 900+ words. Do not say hello class or anything like that. 
+            If organization is needed, you can split the lesson into subsections with subtitles or anything else, but be sure to use HTML tags/formatting to do so.
+            Make sure your response does not at all include * or # and instead uses HTML tags to convey the same formatting. To remind you: <b> or <strong> is used for bolding,
+            <li> is used for a bullet point, and <p> is used for a paragraph. Please use those tags and other HTML tags rather than the #'s and the *'s.` }
         ])
 
         // Output the generated text to the console
@@ -128,7 +185,11 @@ app.post('/generate-notes', async (req, res) => {
 
   try {
     const prompt = `Create a set of notes on the topic of ${topic}, specifically focusing on the subtopics of ${subtopics}. 
-    The notes should be ${depth} in detail (out of basic, intermediat, and advanced).`;
+    The notes should be ${depth} in detail (out of basic, intermediat, and advanced).
+    If organization is needed, you can split the notes into subsections with subtitles, but be sure to use HTML tags/formatting to do so instead of using #s and *s.
+    Make sure your response does not at all include * or # and instead uses HTML tags to convey the same formatting. To remind you: <b> or <strong> is used for bolding,
+    <li> is used for a bullet point, and <p> is used for a paragraph. Please use those tags and other HTML tags rather than the #'s and the *'s.
+    Just because I am asking you to format it neatly does not mean you should write a summary. Ensure the response are notes and not a series of large bodies of text.`;
 
     const result = await model.generateContent([
       { text: prompt }

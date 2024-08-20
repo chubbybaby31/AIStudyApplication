@@ -1,8 +1,159 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import './Lesson.css'
+import axios from 'axios';
 
-const Lesson = () => {
+const Lesson = ({ pdfFile, savedNote, isPdfLesson, lesson, setLesson, setCurrentLocation, setMessageToChat }) => {
+    const [loading, setLoading] = useState(false);
+    const [popupVisible, setPopupVisible] = useState(false);
+    const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
+    const [selectedText, setSelectedText] = useState('');
 
+    const handleUploadLesson = async () => {
+        if (!pdfFile) {
+            alert('Please select a PDF file to upload.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('pdf', pdfFile);
+
+        try {
+            setLoading(true); // Set loading to true
+            const response = await axios.post('http://localhost:8000/lesson', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            setLesson(response.data.summary);
+        } catch (error) {
+            console.error('Error uploading PDF:', error);
+            alert('An error occurred while uploading the PDF. Please try again.');
+        } finally {
+            setLoading(false); // Set loading to false after the request completes
+        }
+    };
+
+    const handleNoteLesson = async () => {
+        try {
+            setLoading(true); // Set loading to true
+            const options = {
+                method: 'POST',
+                body: JSON.stringify({
+                    history: [
+                        {
+                            role: 'user',
+                            parts: [
+                                {
+                                    text: `Here are the notes: ${savedNote}`,
+                                },
+                            ],
+                        },
+                        {
+                            role: 'model',
+                            parts: [{ text: 'Understood.' }],
+                        }
+                    ],
+                    message: `Can you write a detailed lesson as if you were a teacher teaching about these notes. 
+                    Your lesson should seemlessly transition between topics and should be written as a body of text 
+                    (not bullet points, however, it can contain bullet points if necessary). Be sure to include key concepts and vocabulary, along with all important equations. 
+                    Make sure to explain each concept in depth and add analogies if you think the concept you are trying to teach
+                    would be too difficult to understand without one. Do not abuse the analogies though as it will become obvious.
+                    Refrain from using very high level wording to make th elesson easier to understand. The lesson should be quite lengthy, longer than a summary.
+                    It must be 900+ words. Do not say hello class or anything like that.
+                    If organization is needed, you can split the lesson into subsections with subtitles, but be sure to use HTML tags/formatting to do so.
+                    Make sure your response does not at all include * or # and instead uses HTML tags to convey the same formatting. To remind you: <b> or <strong> is used for bolding,
+                    <li> is used for a bullet point, and <p> is used for a paragraph. Please use those tags and other HTML tags rather than the #'s and the *'s.`,
+                }),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            };
+            const response = await fetch('http://localhost:8000/gemini', options);
+            const q = await response.text();
+            setLesson(q);
+        } catch (error) {
+            setLesson("## There was an error summarizing, try again later.");
+        } finally {
+            setLoading(false); // Set loading to false after the request completes
+        }
+    };
+
+    useEffect(() => {
+        if (lesson === "") {
+            if (isPdfLesson) {
+                handleUploadLesson();
+            } else {
+                handleNoteLesson();
+            }
+        }
+    }, [isPdfLesson]);
+
+    const newLesson = () => {
+        if (isPdfLesson) {
+            handleUploadLesson();
+        } else {
+            handleNoteLesson();
+        }
+    }
+
+    const handleTextSelection = () => {
+        const selection = window.getSelection();
+        if (selection.rangeCount > 0) {
+            const selectedText = selection.toString();
+            if (selectedText) {
+                setSelectedText(selectedText);
+                const rect = selection.getRangeAt(0).getBoundingClientRect();
+                setPopupPosition({ x: rect.x + window.scrollX, y: rect.y + window.scrollY });
+                setPopupVisible(true);
+            }
+        }
+    };
+
+    const handleAskAI = () => {
+        if (selectedText) {
+            const message = `Please explain/define this section: "${selectedText}"`;
+            setMessageToChat(message); // Function to send message to the chat
+            setPopupVisible(false); // Hide the popup after sending the message
+        }
+    };
+
+    useEffect(() => {
+        const handleMouseDown = (event) => {
+            const selection = window.getSelection();
+            if (!selection.isCollapsed) {
+                return;
+            }
+            setPopupVisible(false);
+        };
+
+        document.addEventListener('mousedown', handleMouseDown);
+
+        return () => {
+            document.removeEventListener('mousedown', handleMouseDown);
+        };
+    }, []);
+
+    return (
+        <div className="lesson-container" onMouseUp={handleTextSelection}>
+            <h2>{loading ? 'Making Lesson...' : 'Lesson'}</h2>
+            <div 
+                className="lesson-content" 
+                dangerouslySetInnerHTML={{ __html: lesson }} 
+            />
+            {popupVisible && (
+                <div className="popup" style={{ top: popupPosition.y, left: popupPosition.x }}>
+                    <button onClick={handleAskAI}>Ask AI</button>
+                </div>
+            )}
+            <div className="button-container">
+                <button className="back-to-note-button" onClick={() => setCurrentLocation("note-page")}>Back to Notes</button>
+                <button className="new-lesson-button" onClick={() => newLesson()}>Make New Lesson</button>
+                <button className="mcq-button" onClick={() => setCurrentLocation("multiple-choice-page")}>Test Your Knowledge</button>
+                <button className="flash-card-button" onClick={() => setCurrentLocation("flash-cards-page")}>Memorize</button>
+            </div>
+        </div>
+    );
 }
 
 export default Lesson

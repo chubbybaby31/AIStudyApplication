@@ -3,11 +3,10 @@ import React, { useState } from 'react';
 import './GenerateNote.css'; // Create a CSS file for styling if needed
 import axios from 'axios';
 
-const GenerateNotes = ({ setEditNote }) => {
+const GenerateNotes = ({ setEditNote, setLoading }) => {
   const [topic, setTopic] = useState('');
   const [subtopics, setSubtopics] = useState('');
   const [depth, setDepth] = useState('choose'); // Default to 'basic'
-  const [loading, setLoading] = useState(false);
 
   const handleGenerate = async () => {
     if (!topic || !subtopics || depth === "choose") {
@@ -73,7 +72,7 @@ const GenerateNotes = ({ setEditNote }) => {
         className="generate-notes-button" 
         onClick={handleGenerate}
       >
-        {loading ? 'Generating...' : 'Generate'}
+        Generate
       </button>
     </div>
   );

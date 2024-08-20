@@ -2,13 +2,103 @@
     margin: 0;
     padding: 0;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column; /* Change to column to accommodate the navbar */
+    justify-content: flex-start;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+    background-color: transparent; /* Main background color */
+    width: 100vw;
+    background-size: cover;
 }
+
+.navbar {
+    width: 100%;
+    background-color: #fff; /* Navbar background color */
+    display: flex;
+    justify-content: space-between;
+    padding: 3vh 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.nav-heading {
+    margin-left: 4vw;
+}
+
+.nav-button-container {
+    display: flex;
+    gap: 3vw;
+    margin-right: 5vw;
+}
+
+.nav-button {
+    background-color: white;
+    color: rgb(80, 80, 80);
+    box-shadow: 0 0px 0px rgba(0, 0, 0, 0.2);
+    border-radius: 0px;
+    transition: 0.2s;
+    font-size: 14px;
+    padding: none;
+    cursor: pointer;
+}
+
+.nav-button:hover {
+    background-color: white;
+    color: black;
+    box-shadow: 0 0px 0px rgba(0, 0, 0, 0.2);
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+    z-index: 100;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.dropdown-content button {
+    background-color: white;
+    color: rgb(80, 80, 80);
+    padding: 10px 16px;
+    text-align: left;
+    border: none;
+    display: block;
+    width: 100%;
+    box-shadow: none;
+    border-radius: 0;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.dropdown-content button:hover {
+    background-color: #f1f1f1;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.main-body {
+    display: flex;
+}
+
 .left-column {
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
-    margin: 0 7vw;
+    justify-content: space-between;
+    margin: 5vh 7vw;
+    margin-right: 4vw;
+    height: 80vh;
+    gap: 2vh;
 }
 
 .generate-notes-input {

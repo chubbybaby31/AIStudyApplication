@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import './MultipleChoice.css'
 
-const MultipleChoice = ({ note, setCurrentQuestion, answersSelected, setAnswersSelected }) => {
+const MultipleChoice = ({ note, summary, lesson, setCurrentQuestion, answersSelected, setAnswersSelected }) => {
   const [startMCQ, setStartMCQ] = useState(false)
   const [chatHistory, setChatHistory] = useState([])
   const [question, setQuestion] = useState({ Question: null })
@@ -21,13 +21,13 @@ const MultipleChoice = ({ note, setCurrentQuestion, answersSelected, setAnswersS
         method: 'POST',
         body: JSON.stringify({
           history: chatHistory,
-          message: 'Here are the notes, now provide one question: ' + note,
+          message: `Here are the notes: ${note}, Here is the summary ${summary}, Here is the lesson ${lesson}. Now provide one question.`
         }),
         headers: {
           'Content-Type': 'application/json',
         },
       }
-      messageSent =  'Here are the notes, now provide one question: ' + note
+      messageSent =  `Here are the notes: ${note}, Here is the summary ${summary}, Here is the lesson ${lesson}. Now provide one question.`
       const response = await fetch('http://localhost:8000/gemini', options)
       const q = await response.text()
       setQuestion(JSON.parse(q))
@@ -65,7 +65,7 @@ const MultipleChoice = ({ note, setCurrentQuestion, answersSelected, setAnswersS
           role: 'user',
           parts: [
             {
-              text: 'System prompt: You are a teacher who is helping students learn a specific subject. The student will provide notes for you to teach them. When you get the notes you should give a difficult multiple choice question based solely on the information within the notes. In addition, you should provide explanations for each answer choice as to why they are correct or incorrect. The format of this should be a dictionary similar to this example: {Question: Which type of rain is characterized by short, intense bursts?, Choices: [{text: Drizzle, correct: false, explanation: Drizzle is known for its light and continuous nature.}, {text: Shower, correct: true, explanation: Showers are defined by their short duration and intense rainfall.}, {text: Torrential, correct: false, explanation: Torrential rain refers to heavy, prolonged rainfall.}, {text: Monsoon, correct: false, explanation: Monsoon is a seasonal pattern of wind and rain, not a specific type of rain.}]} Obviously, your response should not be related to rain unless the notes are about rain. Use the example as a strict format as to how to respond with the question. Do not feel obligated to make the questions similar to this question. It does not have to be a question about the characteristic or something like that. It can be about anything from the notes. In fact, it would actually be better if it was not a simple question that asks what is a characteristic... or which of the following is not...',
+              text: 'System prompt: You are a teacher who is helping students learn a specific subject. The student will provide on or multple of the following: notes, summary, and/or a lesson for you to teach them. When you get the notes/summary/lesson you should give a difficult multiple choice question based solely on the information within the content provided to you. In addition, you should provide explanations for each answer choice as to why they are correct or incorrect. The format of this should be a dictionary similar to this example: {Question: Which type of rain is characterized by short, intense bursts?, Choices: [{text: Drizzle, correct: false, explanation: Drizzle is known for its light and continuous nature.}, {text: Shower, correct: true, explanation: Showers are defined by their short duration and intense rainfall.}, {text: Torrential, correct: false, explanation: Torrential rain refers to heavy, prolonged rainfall.}, {text: Monsoon, correct: false, explanation: Monsoon is a seasonal pattern of wind and rain, not a specific type of rain.}]} Obviously, your response should not be related to rain unless the notes are about rain. Use the example as a strict format as to how to respond with the question. Do not feel obligated to make the questions similar to this question. It does not have to be a question about the characteristic or something like that. It can be about anything from the content provided. In fact, it would actually be better if it was not a simple question that asks what is a characteristic... or which of the following is not...',
             },
           ],
         },
@@ -77,7 +77,7 @@ const MultipleChoice = ({ note, setCurrentQuestion, answersSelected, setAnswersS
           role: 'user',
           parts: [
             {
-              text: 'System prompt: In addition to this, when the student sends "NEXT QUESTION {RESULT}" you should provide another multiple choice question. The {RESULT} will be filled with either correct or incorrect to represent the student\'s answer. If they got it correct, provide them with a harder question up to an extent, and if they got it incorrect provide them with an easier question. Refrain from repeating questions or providing choices that are not relevant to the notes. Additionally, do not say "as stated by the notes" or something along those lines. Also, make the questions about the subject of the notes and not about if the notes contain something or not. In addition to that, in the explanation do not say "as seen in the notes" or something along those lines. Also ensure that you do not repeat questions.',
+              text: 'System prompt: In addition to this, when the student sends "NEXT QUESTION {RESULT}" you should provide another multiple choice question. The {RESULT} will be filled with either correct or incorrect to represent the student\'s answer. If they got it correct, provide them with a harder question up to an extent, and if they got it incorrect provide them with an easier question. Refrain from repeating questions or providing choices that are not relevant to the content provided. Additionally, do not say "as stated by the notes" or something along those lines. Also, make the questions about the subject of the notes/summary/lesson and not about if they contain something or not. In addition to that, in the explanation do not say "as seen in the notes" or something along those lines. Also ensure that you do not repeat questions.',
             },
           ],
         },
@@ -101,7 +101,7 @@ const MultipleChoice = ({ note, setCurrentQuestion, answersSelected, setAnswersS
           role: 'user',
           parts: [
             {
-              text: 'Also, if the notes appear to be a list of vocabulary that one might get from a class to memorize, then provide them questions that match definition to word or also provide a sentence with a blank and ask which word fills in the blank. In the case of fill in the blank, make the blank a group of "_" characters. Additionally, ensure that if you use the fill in the blank question, it is a sentence that the word would typically be used in and does not simply state the definition. An example of what not to provide: A person who consistently breaks societal norms and laws due to a lack of self-control can be described as ______. This question is bad because it simply states the definition rather than making a sentence that the word would typically be used in. Also make sure all questions are appropriate. Additionally, make sure the questions are hard enough such that one who has not read the notes or is not even familiar with the topic cannot answer the questions.',
+              text: 'Also, if the notes appear to be a list of vocabulary that one might get from a class to memorize, then provide them questions that match definition to word or also provide a sentence with a blank and ask which word fills in the blank. In the case of fill in the blank, make the blank a group of "_" characters. Additionally, ensure that if you use the fill in the blank question, it is a sentence that the word would typically be used in and does not simply state the definition. An example of what not to provide: A person who consistently breaks societal norms and laws due to a lack of self-control can be described as ______. This question is bad because it simply states the definition rather than making a sentence that the word would typically be used in. Also make sure all questions are appropriate. Additionally, make sure the questions are hard enough such that one who has not read the notes/summary/lesson or is not even familiar with the topic cannot answer the questions.',
             },
           ],
         },
@@ -113,7 +113,7 @@ const MultipleChoice = ({ note, setCurrentQuestion, answersSelected, setAnswersS
           role: 'user',
           parts: [
             {
-              text: 'Also, ensure that all text that is presented to the user makes sense. For example, if you are trying to make something subscript, don\'t use <sub></sub> to indicate it is a subscript. Either display it as an actual subscript or don\'t display the subscript at all. Additionally, double-check all of the explanations and ensure that there is truly only one correct answer. Even though I am requesting you only to provide information from the notes, you can use your own background knowledge to determine if an answer is correct or not. However, the explanation should only be relevant to the notes. Also ignore any other previous message that contradicts what I am about to say: do not make any question math-related or ones that require computation. Also, when you use the word "an" in your question and it is followed by a blank make it a(n)... in order to make sure it is always grammatically correct no matter the answer choice.',
+              text: 'Also, ensure that all text that is presented to the user makes sense. For example, if you are trying to make something subscript, don\'t use <sub></sub> to indicate it is a subscript. Either display it as an actual subscript or don\'t display the subscript at all. Additionally, double-check all of the explanations and ensure that there is truly only one correct answer. Even though I am requesting you only to provide information from the notes, summary, and or lesson; you can use your own background knowledge to determine if an answer is correct or not. However, the explanation should only be relevant to the content provided to you. Also ignore any other previous message that contradicts what I am about to say: do not make any question math-related or ones that require computation. Also, when you use the word "an" in your question and it is followed by a blank make it a(n)... in order to make sure it is always grammatically correct no matter the answer choice.',
             },
           ],
         },

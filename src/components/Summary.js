@@ -1,43 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import './Summary.css';
 import axios from 'axios';
+import { ReactComponent as RefreshIcon } from '../assets/icons/refresh-icon.svg';
 
-const Summary = ({ pdfFile, savedNote, isPdfSummary, summary, setSummary, setCurrentLocation, setMessageToChat }) => {
+const Summary = ({ pdfFile, savedNote, isPdfSummary, summary, setSummary, setMessageToChat }) => {
     const [loading, setLoading] = useState(false);
     const [popupVisible, setPopupVisible] = useState(false);
     const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
     const [selectedText, setSelectedText] = useState('');
-
-    const formatResponseText = (text) => {
-        // Replace **text** with <b>text</b> for bold
-        text = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
-        text = text.replace(/\*(.*?)\*/g, '<b>$1</b>');
-
-        // Replace # text with <h1>text</h1>, ## text with <h2>text</h2>, and ### text with <h3>text</h3>
-        text = text.replace(/^(#{1,3})\s*(.*?)$/gm, (match, hashes, content) => {
-            const level = hashes.length; // Count the number of hashes
-            return `<h${level}>${content.trim()}</h${level}>`; // Return the corresponding heading
-        });
-
-        // Handle bullet points
-        const lines = text.split('\n'); // Split by line
-        let formattedText = '<ul>'; // Start an unordered list
-
-        lines.forEach(line => {
-            if (line.trim().startsWith('* ')) {
-                // If the line starts with '* ', treat it as a bullet point
-                const bulletPoint = line.replace(/^\*\s*/, ''); // Remove the '* ' from the start
-                formattedText += `<li>${bulletPoint.trim()}</li>`; // Add it as a list item
-            } else {
-                // For non-bullet lines, just add them as paragraphs
-                formattedText += `<p>${line.trim()}</p>`;
-            }
-        });
-
-        formattedText += '</ul>'; // Close the unordered list
-
-        return formattedText;
-    };
 
     const handleUploadSummarize = async () => {
         if (!pdfFile) {
@@ -91,7 +61,10 @@ const Summary = ({ pdfFile, savedNote, isPdfSummary, summary, setSummary, setCur
                     Make sure the summary does not exceed the length of the 500 words and the length of the text in the document. 
                     Essentially, the summary should not be more than 500 words and if the notes itself are less than 500 words then the summary should be less than the number of words in the pdf
                     Do not add anything extra other than the summary. For example, do not add "sure here is a summary for you:" in your response. 
-                    If necessary, format the summary into sections with subtitles. Also be sure to include proper spacing as needed.`,
+                    If necessary, format the summary into sections with subtitles. Also be sure to include proper spacing as needed.
+                    If organization is needed, you can split the summary into subsections with subtitles, but be sure to use HTML tags/formatting to do so.
+                    Make sure your response does not at all include * or # and instead uses HTML tags to convey the same formatting. To remind you: <b> or <strong> is used for bolding,
+                    <li> is used for a bullet point, and <p> is used for a paragraph. Please use those tags and other HTML tags rather than the #'s and the *'s.`,
                 }),
                 headers: {
                     'Content-Type': 'application/json',
@@ -146,23 +119,38 @@ const Summary = ({ pdfFile, savedNote, isPdfSummary, summary, setSummary, setCur
         }
     };
 
+    useEffect(() => {
+        const handleMouseDown = (event) => {
+            const selection = window.getSelection();
+            if (!selection.isCollapsed) {
+                return;
+            }
+            setPopupVisible(false);
+        };
+
+        document.addEventListener('mousedown', handleMouseDown);
+
+        return () => {
+            document.removeEventListener('mousedown', handleMouseDown);
+        };
+    }, []);
+
     return (
-        <div className="summary-container" onMouseUp={handleTextSelection}>
-            <h2>{loading ? 'Summarizing...' : 'Summary'}</h2>
-            <div 
-                className="summary-content" 
-                dangerouslySetInnerHTML={{ __html: formatResponseText(summary) }} 
-            />
-            {popupVisible && (
-                <div className="popup" style={{ top: popupPosition.y, left: popupPosition.x }}>
-                    <button onClick={handleAskAI}>Ask AI</button>
-                </div>
-            )}
-            <div className="button-container">
-                <button className="back-to-note-button" onClick={() => setCurrentLocation("note-page")}>Back to Notes</button>
-                <button className="new-summary-button" onClick={() => newSummary()}>Generate New Summary</button>
-                <button className="mcq-button" onClick={() => setCurrentLocation("multiple-choice-page")}>Multiple Choice Questions</button>
-                <button className="flash-card-button" onClick={() => setCurrentLocation("flash-cards-page")}>Generate Flash Cards</button>
+        <div>
+            <div className="summary-container" onMouseUp={handleTextSelection}>
+                <div 
+                    className="summary-content" 
+                    dangerouslySetInnerHTML={{ __html: summary }} 
+                />
+                {popupVisible && (
+                    <div className="popup" style={{ top: popupPosition.y, left: popupPosition.x }}>
+                        <button onClick={handleAskAI}>Ask AI</button>
+                    </div>
+                )}
+                <button className="new-summary-button" onClick={() => newSummary()}>
+                    <RefreshIcon className='refresh-icon' />
+                </button>
+                {loading && <div className="loader-summary"></div>}
             </div>
         </div>
     );

@@ -2,10 +2,9 @@ import React, { useState, useRef } from "react";
 import './UploadNote.css';
 import axios from 'axios';
 
-const UploadNote = ({ setEditNote, setCurrentLocation, pdfFile, setPdfFile, setIsPdfSummary }) => {
+const UploadNote = ({ setEditNote, pdfFile, setPdfFile, setLoading }) => {
 
     const [dragActive, setDragActive] = useState(false);
-    const [loading, setLoading] = useState(false);
     const fileInputRef = useRef(null);
 
     const handleFileChange = (e) => {
@@ -74,11 +73,6 @@ const UploadNote = ({ setEditNote, setCurrentLocation, pdfFile, setPdfFile, setI
         }
     };
 
-    const handleSummary = () => {
-        setIsPdfSummary(true)
-        setCurrentLocation('summary-page')
-    }
-
     return (
         <div className="upload-note-container">
             <h2 className="upload-note-title">Upload PDF to Summarize or Convert to Notes</h2>
@@ -105,9 +99,7 @@ const UploadNote = ({ setEditNote, setCurrentLocation, pdfFile, setPdfFile, setI
                 </label>
             </div>
             <div className="action-pdf-buttons">
-                <button className="pdf-action-button" onClick={() => setCurrentLocation('lesson-page')}>Convert to Lesson</button>
-                <button className="pdf-action-button" onClick={() => handleSummary()}>Summarize</button>
-                <button className="pdf-action-button" onClick={() => handleUploadMakeNote()}>{loading ? 'Converting...' : 'Convert to Notes'}</button>
+                <button className="pdf-action-button" onClick={() => handleUploadMakeNote()}>Convert to Notes</button>
             </div>
         </div>
     );

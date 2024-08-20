@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import './Chatbot.css'
 
-const Chatbot = ({ note, currentQuestion, answersSelected, summary, currentLocation, messageToChat }) => {
+const Chatbot = ({ note, currentQuestion, answersSelected, summary, lesson, currentLocation, messageToChat }) => {
   const [messages, setMessages] = useState([
     {
         role: 'user',
@@ -17,7 +17,10 @@ const Chatbot = ({ note, currentQuestion, answersSelected, summary, currentLocat
             Instead, provide them with guidance on how to solve the question and explain/teach to them any terms/concepts they may not understand.
             Remember, do not give the answer away unless they specifically ask for it. 
             Do not ask them to look back at the notes as they do not have access to it anymore, instead re-teach them the concepts.
-            Additionally, do not blatantly hint at which option is the correct answer. This means do not show bias towards an answer choice.`,
+            Additionally, do not blatantly hint at which option is the correct answer. This means do not show bias towards an answer choice.
+            If organization is needed, you can split the response into subsections with subtitles, but be sure to use HTML tags/formatting to do so.
+            Make sure your response does not at all include * or # and instead uses HTML tags to convey the same formatting. To remind you: <b> or <strong> is used for bolding,
+            <li> is used for a bullet point, and <p> is used for a paragraph. Please use those tags and other HTML tags rather than the #'s and the *'s.`,
           },
         ],
       },
@@ -45,7 +48,7 @@ const Chatbot = ({ note, currentQuestion, answersSelected, summary, currentLocat
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             history: messages,
-            message: `Context: Note - ${note}, Current Question - ${JSON.stringify(currentQuestion)}, Answer Choices Selected Already from first to most recent - ${JSON.stringify(answersSelected)}, Summary - ${summary}, Current location on website - ${currentLocation}. User Query: ${temp_input}`
+            message: `Context: Note - ${note}, Current Question - ${JSON.stringify(currentQuestion)}, Answer Choices Selected Already from first to most recent - ${JSON.stringify(answersSelected)}, Summary - ${summary}, Lesson - ${lesson}, Current location on website - ${currentLocation}. User Query: ${temp_input}`
           })
         })
 
@@ -100,42 +103,12 @@ const Chatbot = ({ note, currentQuestion, answersSelected, summary, currentLocat
     }
   }, [messages])
 
-  const formatResponseText = (text) => {
-    // Replace **text** with <b>text</b> for bold
-    text = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
-
-    // Replace # text with <h1>text</h1>, ## text with <h2>text</h2>, and ### text with <h3>text</h3>
-    text = text.replace(/^(#{1,3})\s*(.*?)$/gm, (match, hashes, content) => {
-        const level = hashes.length; // Count the number of hashes
-        return `<h${level}>${content.trim()}</h${level}>`; // Return the corresponding heading
-    });
-
-    // Handle bullet points
-    const lines = text.split('\n'); // Split by line
-    let formattedText = '<ul>'; // Start an unordered list
-
-    lines.forEach(line => {
-        if (line.trim().startsWith('* ')) {
-            // If the line starts with '* ', treat it as a bullet point
-            const bulletPoint = line.replace(/^\*\s*/, ''); // Remove the '* ' from the start
-            formattedText += `<li>${bulletPoint.trim()}</li>`; // Add it as a list item
-        } else {
-            // For non-bullet lines, just add them as paragraphs
-            formattedText += `<p>${line.trim()}</p>`;
-        }
-    });
-
-    formattedText += '</ul>'; // Close the unordered list
-
-    return formattedText;
-};
-
   return (
     <div className="chatbot">
       <div className="chatbox">
         <div className="messages">
         {messages.slice(2).map((message, index) => (
-            <div key={index} className={`message ${message.role}`} dangerouslySetInnerHTML={{ __html: formatResponseText(message.parts[0].text) }} />
+            <div key={index} className={`message ${message.role}`} dangerouslySetInnerHTML={{ __html: message.parts[0].text }} />
           ))}
           <div ref={messagesEndRef} />
         </div>
@@ -150,6 +123,7 @@ const Chatbot = ({ note, currentQuestion, answersSelected, summary, currentLocat
           <button onClick={handleSendMessage}>Send</button>
         </div>
       </div>
+      {/* <div className='back-drop'></div> */}
     </div>
   )
 }
