@@ -25,18 +25,13 @@ const App = () => {
 
   return (
     <div className="app">
-      {currentLocation !== 'note-page' &&
+      {currentLocation === 'summary-page' &&
         <nav className="navbar">
             <h1 className='nav-heading'>Summary</h1>
             <div className='nav-button-container'>
               <button className="nav-button" onClick={() => setCurrentLocation("note-page")}>Back to Notes</button>
-                <div className="dropdown">
-                    <button className="nav-button">Next Steps</button>
-                    <div className="dropdown-content">
-                        <button onClick={() => setCurrentLocation("flash-cards-page")} >Memorize with Flashcards</button>
-                        <button onClick={() => setCurrentLocation("multiple-choice-page")}>Test Your Knowledge with MCQs</button>
-                    </div>
-                </div>
+              <button className="nav-button"  onClick={() => setCurrentLocation("flash-cards-page")} >Memorize with Flash Cards</button>
+              <button className="nav-button" onClick={() => setCurrentLocation("multiple-choice-page")}>Test Your Knowledge with MCQs</button>
             </div>
         </nav>
       }

@@ -21,7 +21,7 @@
   }
 }
 
-button {
+/* button {
   background-color: #4b4b4b;
   border: none;
   color: white;
@@ -34,6 +34,23 @@ button {
 
 button:hover {
   background-color: #2f2f2f;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+} */
+
+button {
+  background-color: #ffcd93;
+  border: none;
+  color: black;
+  padding: 0.5rem;
+  border-radius: 0.3rem;
+  transition: 0.3s;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  font-size: 15px;
+  font-weight: 300;
+}
+
+button:hover {
+  background-color: #ffcd93;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 

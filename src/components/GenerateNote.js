@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import './GenerateNote.css'; // Create a CSS file for styling if needed
 import axios from 'axios';
 
-const GenerateNotes = ({ setEditNote, setLoading }) => {
+const GenerateNotes = ({ setEditNote, setLoading, setIsEditing }) => {
   const [topic, setTopic] = useState('');
   const [subtopics, setSubtopics] = useState('');
   const [depth, setDepth] = useState('choose'); // Default to 'basic'
@@ -29,6 +29,7 @@ const GenerateNotes = ({ setEditNote, setLoading }) => {
       alert('An error occurred while generating the notes. Please try again.');
     } finally {
       setLoading(false);
+      setIsEditing(false)
     }
   };
 

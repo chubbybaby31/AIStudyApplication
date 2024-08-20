@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import './Chatbot.css'
+import {ReactComponent as SendIcon} from '../assets/icons/send-icon.svg'
 
 const Chatbot = ({ note, currentQuestion, answersSelected, summary, lesson, currentLocation, messageToChat }) => {
   const [messages, setMessages] = useState([
@@ -120,7 +121,7 @@ const Chatbot = ({ note, currentQuestion, answersSelected, summary, lesson, curr
             placeholder="Type a message..."
             onKeyDown={handleKeyDown}
           />
-          <button onClick={handleSendMessage}>Send</button>
+          <button className='send-button' onClick={handleSendMessage}><SendIcon className='send-icon' /></button>
         </div>
       </div>
       {/* <div className='back-drop'></div> */}

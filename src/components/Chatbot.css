@@ -65,3 +65,21 @@
   margin-left: 10px; /* Space between input and button */
 }
 
+.send-button {
+  padding: 5px;
+  padding-inline: 7px;
+  background-color: transparent;
+  box-shadow: 0 0px 0px rgba(0, 0, 0, 0.2);
+  border-radius: 100%;
+}
+
+.send-button:hover {
+  background-color: #eee;
+  box-shadow: 0 0px 0px rgba(0, 0, 0, 0.2);
+}
+
+.send-icon {
+  width: 25px;
+  height: 25px;
+}
+

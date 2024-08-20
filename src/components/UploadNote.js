@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import './UploadNote.css';
 import axios from 'axios';
 
-const UploadNote = ({ setEditNote, pdfFile, setPdfFile, setLoading }) => {
+const UploadNote = ({ setEditNote, pdfFile, setPdfFile, setLoading, setIsEditing }) => {
 
     const [dragActive, setDragActive] = useState(false);
     const fileInputRef = useRef(null);
@@ -64,6 +64,7 @@ const UploadNote = ({ setEditNote, pdfFile, setPdfFile, setLoading }) => {
             alert('An error occurred while uploading the PDF. Please try again.');
         } finally {
             setLoading(false)
+            setIsEditing(false)
         }
     };
 

@@ -7,6 +7,7 @@ import GenerateNote from './GenerateNote';
 const Note = ({ savedNote, setSavedNote, setCurrentLocation, pdfFile, setPdfFile, setIsPdfSummary, setIsPdfLesson }) => {
 
     const [loading, setLoading] = useState(false)
+    const [isEditing, setIsEditing] = useState(true);
 
     const handleSummaryTB = () => {
         setCurrentLocation('summary-page')
@@ -33,20 +34,22 @@ const Note = ({ savedNote, setSavedNote, setCurrentLocation, pdfFile, setPdfFile
             <nav className="navbar">
                 <h1 className='nav-heading'>Notes</h1>
                 <div className='nav-button-container'>
-                <div className="dropdown">
-                    <button className="nav-button">Lesson</button>
-                    <div className="dropdown-content">
-                        <button onClick={() => handleLessonPDF()}>Convert PDF to Lesson</button>
-                        <button onClick={() => handleLessonTB()}>Convert Text Box to Lesson</button>
+                    <div className="dropdown">
+                        <button className="nav-button">Lesson</button>
+                        <div className="dropdown-content">
+                            <button onClick={() => handleLessonPDF()}>Convert PDF to Lesson</button>
+                            <button onClick={() => handleLessonTB()}>Convert Text Box to Lesson</button>
+                        </div>
                     </div>
-                </div>
-                <div className="dropdown">
+                    <div className="dropdown">
                         <button className="nav-button">Summary</button>
                         <div className="dropdown-content">
                             <button onClick={() => handleSummaryPDF()}>Summarize PDF</button>
                             <button onClick={() => handleSummaryTB()}>Summarize Text Box</button>
                         </div>
                     </div>
+                    <button className="nav-button" onClick={() => setCurrentLocation("flash-cards-page")}>Memorize with Flash Cards</button>
+                    <button className="nav-button" onClick={() => setCurrentLocation("multiple-choice-page")}>Test Your Knowledge with MCQs</button>
                 </div>
             </nav>
             <div className="main-body">
@@ -55,6 +58,7 @@ const Note = ({ savedNote, setSavedNote, setCurrentLocation, pdfFile, setPdfFile
                         className="generate-note" 
                         setEditNote={setSavedNote} 
                         setLoading={setLoading}
+                        setIsEditing={setIsEditing}
                     />
                     <UploadNote 
                         className="upload-note"
@@ -62,6 +66,7 @@ const Note = ({ savedNote, setSavedNote, setCurrentLocation, pdfFile, setPdfFile
                         pdfFile={pdfFile}
                         setPdfFile={setPdfFile}
                         setLoading={setLoading}
+                        setIsEditing={setIsEditing}
                     />
                 </div>
                 <NoteEntry 
@@ -69,6 +74,8 @@ const Note = ({ savedNote, setSavedNote, setCurrentLocation, pdfFile, setPdfFile
                     editNote={savedNote}
                     setEditNote={setSavedNote}
                     loading={loading}
+                    isEditing={isEditing}
+                    setIsEditing={setIsEditing}
                 />
             </div>
         </div>
