@@ -1,19 +1,24 @@
-import React, { useState, useEffect } from 'react'
-import './MultipleChoice.css'
+import React, { useState, useEffect } from 'react';
+import './MultipleChoice.css';
 
 const MultipleChoice = ({ note, summary, lesson, setCurrentQuestion, answersSelected, setAnswersSelected }) => {
-  const [startMCQ, setStartMCQ] = useState(false)
-  const [chatHistory, setChatHistory] = useState([])
-  const [question, setQuestion] = useState({ Question: null })
-  const [correctAnswer, setCorrectAnswer] = useState('')
-  const [isCorrect, setIsCorrect] = useState(null)
-  const [questionResult, setQuestionResult] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [fetchNewQuestion, setFetchNewQuestion] = useState(false)
-  const numToChar = ['A', 'B', 'C', 'D']
+  const [startMCQ, setStartMCQ] = useState(false);
+  const [chatHistory, setChatHistory] = useState([]);
+  const [question, setQuestion] = useState({ Question: null });
+  const [correctAnswer, setCorrectAnswer] = useState('');
+  const [isCorrect, setIsCorrect] = useState(null);
+  const [questionResult, setQuestionResult] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [fetchNewQuestion, setFetchNewQuestion] = useState(false);
+  const numToChar = ['A', 'B', 'C', 'D'];
 
-  let messageSent = ""
-  let inQuestion = true
+  let messageSent = "";
+  let inQuestion = true;
+
+  useEffect(() => {
+    // Automatically start MCQ when the component mounts
+    setStartMCQ(true);
+  }, []);
 
   const getInitialQuestions = async () => {
     try {
@@ -26,15 +31,15 @@ const MultipleChoice = ({ note, summary, lesson, setCurrentQuestion, answersSele
         headers: {
           'Content-Type': 'application/json',
         },
-      }
-      messageSent =  `Here are the notes: ${note}, Here is the summary ${summary}, Here is the lesson ${lesson}. Now provide one question.`
-      const response = await fetch('http://localhost:8000/gemini', options)
-      const q = await response.text()
-      setQuestion(JSON.parse(q))
+      };
+      messageSent = `Here are the notes: ${note}, Here is the summary ${summary}, Here is the lesson ${lesson}. Now provide one question.`;
+      const response = await fetch('http://localhost:8000/gemini', options);
+      const q = await response.text();
+      setQuestion(JSON.parse(q));
     } catch (error) {
-      setQuestion({ Question: null })
+      setQuestion({ Question: null });
     }
-  }
+  };
 
   const getNewQuestion = async () => {
     try {
@@ -47,20 +52,19 @@ const MultipleChoice = ({ note, summary, lesson, setCurrentQuestion, answersSele
         headers: {
           'Content-Type': 'application/json',
         },
-      }
-      messageSent =  'NEXT QUESTION {' + questionResult + '}'
-      const response = await fetch('http://localhost:8000/gemini', options)
-      const q = await response.text()
-      setQuestion(JSON.parse(q))
+      };
+      messageSent = 'NEXT QUESTION {' + questionResult + '}';
+      const response = await fetch('http://localhost:8000/gemini', options);
+      const q = await response.text();
+      setQuestion(JSON.parse(q));
     } catch (error) {
-      setQuestion({ Question: null })
+      setQuestion({ Question: null });
     }
-  }
+  };
 
-  // Initialize chat history when starting MCQ
   useEffect(() => {
     if (startMCQ) {
-      const initialChatHistory =[
+      const initialChatHistory = [
         {
           role: 'user',
           parts: [
@@ -121,205 +125,173 @@ const MultipleChoice = ({ note, summary, lesson, setCurrentQuestion, answersSele
           role: 'model',
           parts: [{ text: 'Understood.' }],
         },
-      ]
+      ];
 
-      setChatHistory(initialChatHistory)
-      setFetchNewQuestion(true) // Trigger fetching the initial question
+      setChatHistory(initialChatHistory);
+      setFetchNewQuestion(true); // Trigger fetching the initial question
     }
-  }, [startMCQ])
+  }, [startMCQ]);
 
   // Fetch a new question when needed
   useEffect(() => {
     if (fetchNewQuestion && startMCQ) {
-      setIsLoading(true)
+      setIsLoading(true);
       if (inQuestion) {
-        getInitialQuestions() // Fetch the initial question
-        inQuestion = false
+        getInitialQuestions(); // Fetch the initial question
+        inQuestion = false;
       } else {
-        getNewQuestion() // Fetch subsequent questions
+        getNewQuestion(); // Fetch subsequent questions
       }
-      setFetchNewQuestion(false) // Reset the flag after fetching
+      setFetchNewQuestion(false); // Reset the flag after fetching
     }
-  }, [fetchNewQuestion, startMCQ, chatHistory.length])
+  }, [fetchNewQuestion, startMCQ, chatHistory.length]);
 
-  // Update chat history and fetch new question based on user interaction
   useEffect(() => {
     if (question['Question']) {
-            setCurrentQuestion(question)
-            setChatHistory((oldChatHistory) => [
-            ...oldChatHistory,
-            {
-            role: 'user',
-            parts: [{ text: messageSent }],
-            },
-            {
-            role: 'model',
-            parts: [{ text: JSON.stringify(question) }],
-            },
-        ])
+      setCurrentQuestion(question);
+      setChatHistory((oldChatHistory) => [
+        ...oldChatHistory,
+        {
+          role: 'user',
+          parts: [{ text: messageSent }],
+        },
+        {
+          role: 'model',
+          parts: [{ text: JSON.stringify(question) }],
+        },
+      ]);
 
-        for (let i = 0; i < 4; i++) {
-            if (question['Choices'][i]['correct']) {
-                setCorrectAnswer(numToChar[i])
-            }
+      for (let i = 0; i < 4; i++) {
+        if (question['Choices'][i]['correct']) {
+          setCorrectAnswer(numToChar[i]);
         }
-        setIsCorrect(null)
-        setAnswersSelected([])
-        setQuestionResult('')
-        setIsLoading(false)
-    }
-  }, [question])
-
-  const checkCorrect = () => {
-    const radios = document.getElementsByName('choice')
-    for (let y = 0; y < radios.length; y++) {
-      if (radios[y].checked && radios[y].value === correctAnswer) {
-        setIsCorrect(true)
-        setAnswersSelected((oldAnswersSelected) => [...oldAnswersSelected, radios[y].value])
-        if (questionResult === '') {
-          setQuestionResult('CORRECT')
-        }
-        return
-      } else if (radios[y].checked && radios[y].value !== correctAnswer) {
-        setIsCorrect(false)
-        setAnswersSelected((oldAnswersSelected) => [...oldAnswersSelected, radios[y].value])
-        if (questionResult === '') {
-          setQuestionResult('INCORRECT')
-        }
-        return
       }
+      setIsCorrect(null);
+      setAnswersSelected([]);
+      setQuestionResult('');
+      setIsLoading(false);
     }
-    setIsCorrect(null)
-  }
+  }, [question]);
+
+  const checkCorrect = (selectedValue) => {
+    setAnswersSelected((oldAnswersSelected) => [...oldAnswersSelected, selectedValue]);
+    if (selectedValue === correctAnswer) {
+      setIsCorrect(true);
+      setQuestionResult('CORRECT');
+    } else {
+      setIsCorrect(false);
+      setQuestionResult('INCORRECT');
+    }
+  };
 
   const handleNext = () => {
-    setFetchNewQuestion(true) // Set the flag to fetch a new question
-  }
+    setIsLoading(true); // Set loading to true to show the loader
+    setFetchNewQuestion(true); // Set the flag to fetch a new question
+  };
 
   return (
     <div>
       {startMCQ && (
         <div>
-          {isLoading && <div className="loader"></div>}
-          {!isLoading && (
-            <div className="mcq-container">
-              {question['Question'] && (
-                <div className="mcq-valid">
+          <div className="mcq-container">
+            {question['Question'] && (
+              <div className="mcq-valid">
+                <div className="separator">
                   <div className="question-prompt-container">
                     <h3 className="question-prompt">{question['Question']}</h3>
                   </div>
                   <div className="choice-container">
                     <ul className="choices">
-                      <li>
-                        <label>
-                          <input type="radio" name="choice" value="A" />
-                          <span>{question['Choices'][0]['text']}</span>
-                        </label>
-                      </li>
-                      <li>
-                        <label>
-                          <input type="radio" name="choice" value="B" />
-                          <span>{question['Choices'][1]['text']}</span>
-                        </label>
-                      </li>
-                      <li>
-                        <label>
-                          <input type="radio" name="choice" value="C" />
-                          <span>{question['Choices'][2]['text']}</span>
-                        </label>
-                      </li>
-                      <li>
-                        <label>
-                          <input type="radio" name="choice" value="D" />
-                          <span>{question['Choices'][3]['text']}</span>
-                        </label>
-                      </li>
+                      {question['Choices'].map((choice, index) => (
+                        <li key={index}>
+                          <label>
+                            <input
+                              type="radio"
+                              name="choice"
+                              value={numToChar[index]}
+                              onChange={() => checkCorrect(numToChar[index])}
+                              disabled={isCorrect} // Disable only if the correct answer is selected
+                            />
+                            <span>{choice['text']}</span>
+                          </label>
+                        </li>
+                      ))}
                     </ul>
                   </div>
-                  <div className="explanation-container">
-                    {(answersSelected.includes('A') || isCorrect) && (
-                      <div className="explanation">
-                        {correctAnswer === 'A' && (
-                          <span className="explanation-text">
-                            <b className="correct">A is correct:</b> {question['Choices'][0]['explanation']}
-                          </span>
-                        )}
-                        {correctAnswer !== 'A' && (
-                          <span className="explanation-text">
-                            <b className="incorrect">A is incorrect:</b> {question['Choices'][0]['explanation']}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    {(answersSelected.includes('B') || isCorrect) && (
-                      <div className="explanation">
-                        {correctAnswer === 'B' && (
-                          <span className="explanation-text">
-                            <b className="correct">B is correct:</b> {question['Choices'][1]['explanation']}
-                          </span>
-                        )}
-                        {correctAnswer !== 'B' && (
-                          <span className="explanation-text">
-                            <b className="incorrect">B is incorrect:</b> {question['Choices'][1]['explanation']}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    {(answersSelected.includes('C') || isCorrect) && (
-                      <div className="explanation">
-                        {correctAnswer === 'C' && (
-                          <span className="explanation-text">
-                            <b className="correct">C is correct:</b> {question['Choices'][2]['explanation']}
-                          </span>
-                        )}
-                        {correctAnswer !== 'C' && (
-                          <span className="explanation-text">
-                            <b className="incorrect">C is incorrect:</b> {question['Choices'][2]['explanation']}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    {(answersSelected.includes('D') || isCorrect) && (
-                      <div className="explanation">
-                        {correctAnswer === 'D' && (
-                          <span className="explanation-text">
-                            <b className="correct">D is correct:</b> {question['Choices'][3]['explanation']}
-                          </span>
-                        )}
-                        {correctAnswer !== 'D' && (
-                          <span className="explanation-text">
-                            <b className="incorrect">D is incorrect:</b> {question['Choices'][3]['explanation']}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  <div className="button-container">
-                    {!isCorrect && (
-                      <button className="check-answer-button" onClick={() => checkCorrect()}>
-                        SUBMIT
-                      </button>
-                    )}
-                    {isCorrect && (
-                      <button className="next-question-button" onClick={() => handleNext()}>
-                        NEXT
-                      </button>
-                    )}
-                  </div>
                 </div>
-              )}
-              {!question['Question'] && <div className="mcq-invalid">Save your notes to test your knowledge</div>}
-            </div>
-          )}
+                <div className="explanation-container">
+                  {(answersSelected.includes('A') || isCorrect) && (
+                    <div className="explanation">
+                      {correctAnswer === 'A' ? (
+                        <span className="explanation-text">
+                          <b className="correct">A is correct:</b> {question['Choices'][0]['explanation']}
+                        </span>
+                      ) : (
+                        <span className="explanation-text">
+                          <b className="incorrect">A is incorrect:</b> {question['Choices'][0]['explanation']}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {(answersSelected.includes('B') || isCorrect) && (
+                    <div className="explanation">
+                      {correctAnswer === 'B' ? (
+                        <span className="explanation-text">
+                          <b className="correct">B is correct:</b> {question['Choices'][1]['explanation']}
+                        </span>
+                      ) : (
+                        <span className="explanation-text">
+                          <b className="incorrect">B is incorrect:</b> {question['Choices'][1]['explanation']}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {(answersSelected.includes('C') || isCorrect) && (
+                    <div className="explanation">
+                      {correctAnswer === 'C' ? (
+                        <span className="explanation-text">
+                          <b className="correct">C is correct:</b> {question['Choices'][2]['explanation']}
+                        </span>
+                      ) : (
+                        <span className="explanation-text">
+                          <b className="incorrect">C is incorrect:</b> {question['Choices'][2]['explanation']}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {(answersSelected.includes('D') || isCorrect) && (
+                    <div className="explanation">
+                      {correctAnswer === 'D' ? (
+                        <span className="explanation-text">
+                          <b className="correct">D is correct:</b> {question['Choices'][3]['explanation']}
+                        </span>
+                      ) : (
+                        <span className="explanation-text">
+                          <b className="incorrect">D is incorrect:</b> {question['Choices'][3]['explanation']}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className="button-container">
+                  <button className="next-question-button" onClick={() => handleNext()}>
+                    {isCorrect ? 'Next' : 'Skip'}
+                  </button>
+                </div>
+              </div>
+            )}
+            {!question['Question'] && 
+            <div className="mcq-invalid">
+              <br />
+              Create your notes to test your knowledge. <br /><br />
+              Once created, your questions will generate here...
+            </div>}
+            {isLoading && <div className="loader-mcq"></div>}
+          </div>
         </div>
       )}
-      {!startMCQ && (
-        <button className="start-mcq-button" onClick={() => setStartMCQ(true)}>
-          Generate Questions
-        </button>
-      )}
     </div>
-  )
-}
+  );
+};
 
-export default MultipleChoice
+export default MultipleChoice;

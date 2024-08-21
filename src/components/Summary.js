@@ -64,7 +64,8 @@ const Summary = ({ pdfFile, savedNote, isPdfSummary, summary, setSummary, setMes
                     If necessary, format the summary into sections with subtitles. Also be sure to include proper spacing as needed.
                     If organization is needed, you can split the summary into subsections with subtitles, but be sure to use HTML tags/formatting to do so.
                     Make sure your response does not at all include * or # and instead uses HTML tags to convey the same formatting. To remind you: <b> or <strong> is used for bolding,
-                    <li> is used for a bullet point, and <p> is used for a paragraph. Please use those tags and other HTML tags rather than the #'s and the *'s.`,
+                    <li> is used for a bullet point, and <p> is used for a paragraph. Please use those tags and other HTML tags rather than the #'s and the *'s.
+                    Make sure there is a h2 title.`,
                 }),
                 headers: {
                     'Content-Type': 'application/json',
@@ -135,12 +136,43 @@ const Summary = ({ pdfFile, savedNote, isPdfSummary, summary, setSummary, setMes
         };
     }, []);
 
+    const formatResponseText = (text) => {
+        // Replace **text** with <b>text</b> for bold
+        text = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+        text = text.replace(/\*(.*?)\*/g, '<b>$1</b>');
+
+        // Replace # text with <h1>text</h1>, ## text with <h2>text</h2>, and ### text with <h3>text</h3>
+        text = text.replace(/^(#{1,6})\s*(.*?)$/gm, (match, hashes, content) => {
+            const level = hashes.length; // Count the number of hashes
+            return `<h${level}>${content.trim()}</h${level}>`; // Return the corresponding heading
+        });
+
+        // Handle bullet points
+        const lines = text.split('\n'); // Split by line
+        let formattedText = '<ul>'; // Start an unordered list
+
+        lines.forEach(line => {
+            if (line.trim().startsWith('* ')) {
+                // If the line starts with '* ', treat it as a bullet point
+                const bulletPoint = line.replace(/^\*\s*/, ''); // Remove the '* ' from the start
+                formattedText += `<li>${bulletPoint.trim()}</li>`; // Add it as a list item
+            } else {
+                // For non-bullet lines, just add them as paragraphs
+                formattedText += `<p>${line.trim()}</p>`;
+            }
+        });
+
+        formattedText += '</ul>'; // Close the unordered list
+
+        return formattedText;
+    };
+
     return (
         <div>
             <div className="summary-container" onMouseUp={handleTextSelection}>
                 <div 
                     className="summary-content" 
-                    dangerouslySetInnerHTML={{ __html: summary }} 
+                    dangerouslySetInnerHTML={{ __html: formatResponseText(summary) }} 
                 />
                 {popupVisible && (
                     <div className="popup" style={{ top: popupPosition.y, left: popupPosition.x }}>

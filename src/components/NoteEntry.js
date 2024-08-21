@@ -23,6 +23,37 @@ const NoteEntry = ({ editNote, setEditNote, loading, isEditing, setIsEditing }) 
         setIsEditing(!isEditing);
     };
 
+    const formatResponseText = (text) => {
+        // Replace **text** with <b>text</b> for bold
+        text = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+        text = text.replace(/\*(.*?)\*/g, '<b>$1</b>');
+
+        // Replace # text with <h1>text</h1>, ## text with <h2>text</h2>, and ### text with <h3>text</h3>
+        text = text.replace(/^(#{1,6})\s*(.*?)$/gm, (match, hashes, content) => {
+            const level = hashes.length; // Count the number of hashes
+            return `<h${level}>${content.trim()}</h${level}>`; // Return the corresponding heading
+        });
+
+        // Handle bullet points
+        const lines = text.split('\n'); // Split by line
+        let formattedText = '<ul>'; // Start an unordered list
+
+        lines.forEach(line => {
+            if (line.trim().startsWith('* ')) {
+                // If the line starts with '* ', treat it as a bullet point
+                const bulletPoint = line.replace(/^\*\s*/, ''); // Remove the '* ' from the start
+                formattedText += `<li>${bulletPoint.trim()}</li>`; // Add it as a list item
+            } else {
+                // For non-bullet lines, just add them as paragraphs
+                formattedText += `<p>${line.trim()}</p>`;
+            }
+        });
+
+        formattedText += '</ul>'; // Close the unordered list
+
+        return formattedText;
+    };
+
     return (
         <div className="note-entry-container">
             <div className="back-drop-note"></div>
@@ -41,7 +72,7 @@ const NoteEntry = ({ editNote, setEditNote, loading, isEditing, setIsEditing }) 
                     <div
                         className="note-display-box"
                         ref={displayRef}
-                        dangerouslySetInnerHTML={{ __html: editNote }} // Render HTML content
+                        dangerouslySetInnerHTML={{ __html: formatResponseText(editNote) }} // Render HTML content
                     />
                 )}
                 <div className="button-container">

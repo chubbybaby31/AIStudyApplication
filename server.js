@@ -98,7 +98,10 @@ app.post('/summarize', upload.single('pdf'), async (req, res) => {
             If necessary, format the summary into sections with subtitles. Also be sure to add proper spacing as needed.
             If organization is needed, you can split the summary into subsections with subtitles, but be sure to use HTML tags/formatting to do so.
             Make sure your response does not at all include * or # and instead uses HTML tags to convey the same formatting. To remind you: <b> or <strong> is used for bolding,
-            <li> is used for a bullet point, and <p> is used for a paragraph. Please use those tags and other HTML tags rather than the #'s and the *'s.` }
+            <li> is used for a bullet point, and <p> is used for a paragraph. Please use those tags and other HTML tags rather than the #'s and the *'s.
+            Remember, if you want to communicate bolded words or any other type of formatted text, please use HTML or else you will suffer the consequence.
+            You often times use **this is bolded** to bold a word, instead do this: <b>this is bolded</b>.
+            Make sure there is a h2 title.` }
         ])
 
         // Output the generated text to the console
@@ -149,7 +152,10 @@ app.post('/lesson', upload.single('pdf'), async (req, res) => {
             It must be 900+ words. Do not say hello class or anything like that. 
             If organization is needed, you can split the lesson into subsections with subtitles or anything else, but be sure to use HTML tags/formatting to do so.
             Make sure your response does not at all include * or # and instead uses HTML tags to convey the same formatting. To remind you: <b> or <strong> is used for bolding,
-            <li> is used for a bullet point, and <p> is used for a paragraph. Please use those tags and other HTML tags rather than the #'s and the *'s.` }
+            <li> is used for a bullet point, and <p> is used for a paragraph. Please use those tags and other HTML tags rather than the #'s and the *'s.
+            Remember, if you want to communicate bolded words or any other type of formatted text, please use HTML or else you will suffer the consequence.
+            You often times use **this is bolded** to bold a word, instead do this: <b>this is bolded</b>.
+            Make sure there is a h2 title.` }
         ])
 
         // Output the generated text to the console

@@ -1,13 +1,18 @@
 .lesson-container {
-    background-color: #ffffff;
+    background-color: #fff;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     width: 40vw;
     margin: auto;
     font-family: Arial, sans-serif;
-    height: 85vh;
+    height: 70vh; /* Match height with summary */
     align-items: center;
+    z-index: 100;
+    margin-left: 7vw;
+    margin-top: 7vh;
+    margin-bottom: 0px;
+    line-height: 35px;
 }
 
 .lesson-container h2 {
@@ -17,19 +22,21 @@
 
 .lesson-content {
     overflow-y: scroll;
-    height: 72vh;
-    border: 1px solid #ccc;
+    height: calc(70vh - 40px); /* Match height calculation with summary */
+    border: none; /* Remove border to match summary */
     border-radius: 4px;
     font-size: 20px;
     padding-top: 20px;
     padding-right: 20px;
 }
 
+.lesson-content::-webkit-scrollbar {
+    display: none; /* Hide scrollbar */
+}
+
 .lesson-container p {
     margin-bottom: 20px;
 }
-
-/* src/components/lesson.css */
 
 .popup {
     position: absolute;
@@ -41,4 +48,60 @@
     padding: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     z-index: 1000; /* Ensure it appears above other elements */
+}
+
+.lesson-container h2,
+.lesson-container h3,
+.lesson-container h4 {
+    margin-top: 1.5em; /* Space above headings */
+    margin-bottom: 0.5em; /* Space below headings */
+}
+
+.lesson-container p {
+    margin: 1em 0; /* Space above and below paragraphs */
+}
+
+.lesson-container ul {
+    margin: 1em 0; /* Space above and below lists */
+    padding-left: 20px; /* Indent the list items */
+}
+
+.lesson-container li {
+    margin-bottom: 0.5em; /* Space between list items */
+}
+
+.new-lesson-button {
+    padding: 0;
+    background-color: transparent;
+    box-shadow: 0 0px 0px rgba(0, 0, 0, 0.2);
+    position: absolute;
+    top: 13vh;
+    left: 45vw;
+}
+
+.new-lesson-button:hover {
+    background-color: transparent;
+    box-shadow: 0 0px 0px rgba(0, 0, 0, 0.2);
+}
+
+.loader-lesson {
+    width: 20px;
+    aspect-ratio: 1.154;
+    background: repeating-conic-gradient(from -30deg,#ff6a6a 0 60deg,#ffcd93 0 120deg,#ff8383 0 180deg); 
+    animation: l13 1.5s infinite alternate;
+    position: absolute;
+    top: 9vh;
+    left: 45vw;
+    z-index: 2;
+}
+
+@keyframes l13 {
+    0%,
+    10%  {clip-path: polygon(50% 50%,25% 100%,25% 100%,25% 100%,25% 100%,75% 100%,75% 100%,75% 100%)}
+    33%,
+    43%  {clip-path: polygon(50% 50%,0   50% ,0   50% ,0   50% ,25% 100%,75% 100%,100% 50%,100% 50%)}
+    66%,
+    76%  {clip-path: polygon(50% 50%,25% 0   ,25% 0   ,0   50% ,25% 100%,75% 100%,100% 50%,75%  0  )}
+    95%,
+    100% {clip-path: polygon(50% 50%,75% 0   ,25% 0   ,0   50% ,25% 100%,75% 100%,100% 50%,75%  0  )}
 }

@@ -70,3 +70,20 @@ button:hover {
   top: 7vh;
   left: 7vw;
 }
+
+.mcq-box {
+  z-index: 1;
+}
+
+.back-drop-mcq {
+  background: linear-gradient(135deg, #ffcd93, #ff8383);
+  width: 40vw;
+  height: 79vh;
+  z-index: -1;
+  position: absolute;
+  transform: rotate(-6deg);
+  border-radius: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  top: 4vh;
+  left: 7vw;
+}

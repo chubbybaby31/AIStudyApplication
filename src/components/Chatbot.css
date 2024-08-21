@@ -38,8 +38,9 @@
 }
 
 .user {
-  background-color: #faf9e0;
+  background-color: #ffcd9374;
   align-self: flex-end;
+  padding-left: 30px;
 }
 
 .model {

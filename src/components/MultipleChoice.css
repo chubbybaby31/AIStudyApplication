@@ -1,15 +1,29 @@
 .mcq-container {
   background-color: white;
   padding: 20px;
-  border-radius: 12px;
+  border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  width: 35vw;
+  width: 40vw;
+  height: 80vh;
   margin: auto;
   font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* Align items at the top */
+  margin-left: 7vw;
+  margin-top: 3vh;
 }
 
 .mcq-valid {
   margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* Align items at the top */
+  height: 100%; /* Use full height of the container */
+}
+
+.separator {
+  flex-grow: 0; /* Prevents this section from growing */
 }
 
 .question-prompt-container {
@@ -18,8 +32,11 @@
 }
 
 .question-prompt {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: bold;
+  color: #4b4b4b;
+  margin-top: 1vh;
+  margin-bottom: 3vh;
 }
 
 .choice-container {
@@ -29,6 +46,9 @@
 .choices {
   list-style-type: none;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .choices li {
@@ -36,29 +56,57 @@
 }
 
 .choices label {
-  display: flex;
-  align-items: center;
+  display: block;
+  background-color: #f1f1f1;
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 250;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  border: 1px solid #ddd;
+}
+
+.choices label:hover {
+  background-color: #e0e0e0;
+  transform: translateY(-2px);
 }
 
 .choices input[type='radio'] {
-  margin-right: 10px;
+  display: none;
 }
 
 .explanation-container {
+  flex-grow: 1; /* Allow this section to grow */
   margin-bottom: 20px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9; /* Light background for better contrast */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  height: 150px; /* Fixed height for the explanation area */
+  overflow-y: scroll; /* Enable vertical scrolling */
+}
+
+.explanation {
+  margin-bottom: 15px;
 }
 
 .explanation-text {
-  font-size: 14px;
-  color: #666;
+  font-size: 18px; /* Increased font size for better readability */
+  color: #333; /* Darker color for better contrast */
+  margin: 5px 0;
+  line-height: 1.25; /* Improved line height for better readability */
 }
 
 .correct {
   color: green;
+  font-weight: bold; /* Make correct answers bold */
 }
 
 .incorrect {
-  color: red;
+  color: rgb(255, 124, 124);
+  font-weight: bold; /* Make incorrect answers bold */
 }
 
 .button-container {
@@ -70,24 +118,38 @@
 .next-question-button,
 .start-mcq-button {
   width: 100%;
-  padding: 12px;
-  background-color: #fff42a;
-  color: black;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s;
 }
 
-.check-answer-button:hover,
-.next-question-button:hover,
-.start-mcq-button:hover {
-  background-color: #f1e726;
+.loader-mcq {
+  width: 20px;
+  aspect-ratio: 1.154;
+  background: repeating-conic-gradient(from -30deg, #ff6a6a 0 60deg, #ffcd93 0 120deg, #ff8383 0 180deg);
+  animation: l13 1.5s infinite alternate;
+  position: absolute;
+  z-index: 2;
+  top: 4vh;
+  left: 7.5vw;
 }
 
-.loader {
-  /* Add styles for a loader if you have one */
+@keyframes l13 {
+  0%,
+  10% {
+    clip-path: polygon(50% 50%, 25% 100%, 25% 100%, 25% 100%, 25% 100%, 75% 100%, 75% 100%, 75% 100%);
+  }
+  33%,
+  43% {
+    clip-path: polygon(50% 50%, 0 50%, 0 50%, 0 50%, 25% 100%, 75% 100%, 100% 50%, 100% 50%);
+  }
+  66%,
+  76% {
+    clip-path: polygon(50% 50%, 25% 0, 25% 0, 0 50%, 25% 100%, 75% 100%, 100% 50%, 75% 0);
+  }
+  95%,
+  100% {
+    clip-path: polygon(50% 50%, 75% 0, 25% 0, 0 50%, 25% 100%, 75% 100%, 100% 50%, 75% 0);
+  }
 }
 
 .mcq-invalid {

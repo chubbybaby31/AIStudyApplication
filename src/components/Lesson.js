@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react'
-import './Lesson.css'
+import React, { useState, useEffect } from 'react';
+import './Lesson.css';
 import axios from 'axios';
+import { ReactComponent as RefreshIcon } from '../assets/icons/refresh-icon.svg';
 
 const Lesson = ({ pdfFile, savedNote, isPdfLesson, lesson, setLesson, setCurrentLocation, setMessageToChat }) => {
     const [loading, setLoading] = useState(false);
@@ -55,15 +56,16 @@ const Lesson = ({ pdfFile, savedNote, isPdfLesson, lesson, setLesson, setCurrent
                         }
                     ],
                     message: `Can you write a detailed lesson as if you were a teacher teaching about these notes. 
-                    Your lesson should seemlessly transition between topics and should be written as a body of text 
+                    Your lesson should seamlessly transition between topics and should be written as a body of text 
                     (not bullet points, however, it can contain bullet points if necessary). Be sure to include key concepts and vocabulary, along with all important equations. 
                     Make sure to explain each concept in depth and add analogies if you think the concept you are trying to teach
                     would be too difficult to understand without one. Do not abuse the analogies though as it will become obvious.
-                    Refrain from using very high level wording to make th elesson easier to understand. The lesson should be quite lengthy, longer than a summary.
+                    Refrain from using very high level wording to make the lesson easier to understand. The lesson should be quite lengthy, longer than a summary.
                     It must be 900+ words. Do not say hello class or anything like that.
                     If organization is needed, you can split the lesson into subsections with subtitles, but be sure to use HTML tags/formatting to do so.
                     Make sure your response does not at all include * or # and instead uses HTML tags to convey the same formatting. To remind you: <b> or <strong> is used for bolding,
-                    <li> is used for a bullet point, and <p> is used for a paragraph. Please use those tags and other HTML tags rather than the #'s and the *'s.`,
+                    <li> is used for a bullet point, and <p> is used for a paragraph. Please use those tags and other HTML tags rather than the #'s and the *'s.
+                    Make sure there is an h2 title.`,
                 }),
                 headers: {
                     'Content-Type': 'application/json',
@@ -134,26 +136,56 @@ const Lesson = ({ pdfFile, savedNote, isPdfLesson, lesson, setLesson, setCurrent
         };
     }, []);
 
+    const formatResponseText = (text) => {
+        // Replace **text** with <b>text</b> for bold
+        text = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+        text = text.replace(/\*(.*?)\*/g, '<b>$1</b>');
+
+        // Replace # text with <h1>text</h1>, ## text with <h2>text</h2>, and ### text with <h3>text</h3>
+        text = text.replace(/^(#{1,6})\s*(.*?)$/gm, (match, hashes, content) => {
+            const level = hashes.length; // Count the number of hashes
+            return `<h${level}>${content.trim()}</h${level}>`; // Return the corresponding heading
+        });
+
+        // Handle bullet points
+        const lines = text.split('\n'); // Split by line
+        let formattedText = '<ul>'; // Start an unordered list
+
+        lines.forEach(line => {
+            if (line.trim().startsWith('* ')) {
+                // If the line starts with '* ', treat it as a bullet point
+                const bulletPoint = line.replace(/^\*\s*/, ''); // Remove the '* ' from the start
+                formattedText += `<li>${bulletPoint.trim()}</li>`; // Add it as a list item
+            } else {
+                // For non-bullet lines, just add them as paragraphs
+                formattedText += `<p>${line.trim()}</p>`;
+            }
+        });
+
+        formattedText += '</ul>'; // Close the unordered list
+
+        return formattedText;
+    };
+
     return (
-        <div className="lesson-container" onMouseUp={handleTextSelection}>
-            <h2>{loading ? 'Making Lesson...' : 'Lesson'}</h2>
-            <div 
-                className="lesson-content" 
-                dangerouslySetInnerHTML={{ __html: lesson }} 
-            />
-            {popupVisible && (
-                <div className="popup" style={{ top: popupPosition.y, left: popupPosition.x }}>
-                    <button onClick={handleAskAI}>Ask AI</button>
-                </div>
-            )}
-            <div className="button-container">
-                <button className="back-to-note-button" onClick={() => setCurrentLocation("note-page")}>Back to Notes</button>
-                <button className="new-lesson-button" onClick={() => newLesson()}>Make New Lesson</button>
-                <button className="mcq-button" onClick={() => setCurrentLocation("multiple-choice-page")}>Test Your Knowledge</button>
-                <button className="flash-card-button" onClick={() => setCurrentLocation("flash-cards-page")}>Memorize</button>
+        <div>
+            <div className="lesson-container" onMouseUp={handleTextSelection}>
+                <div 
+                    className="lesson-content" 
+                    dangerouslySetInnerHTML={{ __html: formatResponseText(lesson) }} 
+                />
+                {popupVisible && (
+                    <div className="popup" style={{ top: popupPosition.y, left: popupPosition.x }}>
+                        <button onClick={handleAskAI}>Ask AI</button>
+                    </div>
+                )}
+                <button className="new-lesson-button" onClick={() => newLesson()}>
+                    <RefreshIcon className='refresh-icon' />
+                </button>
+                {loading && <div className="loader-lesson"></div>}
             </div>
         </div>
     );
-}
+};
 
-export default Lesson
+export default Lesson;
