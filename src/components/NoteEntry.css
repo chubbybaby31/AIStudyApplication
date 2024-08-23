@@ -39,6 +39,7 @@
     border: none;
     border-radius: 8px;
     font-size: 16px;
+    line-height: 35px;
     resize: none;
     width: 100%; /* Use full width of the container */
     height: 60vh;
@@ -123,8 +124,29 @@
     transition: 0.3s ease;
 }
 
+.upload-button {
+    position: absolute;
+    bottom: 65px;
+    right: 10px;
+    padding: 0px; /* Adjust padding for better alignment */
+    background-color: transparent;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 2;
+    box-shadow: 0 0px 0px rgba(0, 0, 0, 0.2);
+}
+
+.image-icon {
+    width: 20px; /* Adjust size as needed */
+    height: 20px; /* Adjust size as needed */
+    fill: #ffffff;
+    transition: 0.3s ease;
+}
+
 .toggle-button:hover,
-.copy-button:hover {
+.copy-button:hover,
+.upload-button:hover {
     background-color: transparent;
     box-shadow: 0 0px 0px rgba(0, 0, 0, 0.2);
 }

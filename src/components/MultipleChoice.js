@@ -6,8 +6,7 @@ const MultipleChoice = ({ note, summary, lesson, setCurrentQuestion, answersSele
   const [chatHistory, setChatHistory] = useState([]);
   const [question, setQuestion] = useState({ Question: null });
   const [correctAnswer, setCorrectAnswer] = useState('');
-  const [isCorrect, setIsCorrect] = useState(null);
-  const [questionResult, setQuestionResult] = useState('');
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [fetchNewQuestion, setFetchNewQuestion] = useState(false);
   const numToChar = ['A', 'B', 'C', 'D'];
@@ -47,13 +46,13 @@ const MultipleChoice = ({ note, summary, lesson, setCurrentQuestion, answersSele
         method: 'POST',
         body: JSON.stringify({
           history: chatHistory,
-          message: 'NEXT QUESTION {' + questionResult + '}',
+          message: 'NEXT QUESTION {' + (selectedAnswer === correctAnswer ? 'CORRECT' : 'INCORRECT') + '}',
         }),
         headers: {
           'Content-Type': 'application/json',
         },
       };
-      messageSent = 'NEXT QUESTION {' + questionResult + '}';
+      messageSent = 'NEXT QUESTION {' + (selectedAnswer === correctAnswer ? 'CORRECT' : 'INCORRECT') + '}';
       const response = await fetch('http://localhost:8000/gemini', options);
       const q = await response.text();
       setQuestion(JSON.parse(q));
@@ -69,7 +68,7 @@ const MultipleChoice = ({ note, summary, lesson, setCurrentQuestion, answersSele
           role: 'user',
           parts: [
             {
-              text: 'System prompt: You are a teacher who is helping students learn a specific subject. The student will provide on or multple of the following: notes, summary, and/or a lesson for you to teach them. When you get the notes/summary/lesson you should give a difficult multiple choice question based solely on the information within the content provided to you. In addition, you should provide explanations for each answer choice as to why they are correct or incorrect. The format of this should be a dictionary similar to this example: {Question: Which type of rain is characterized by short, intense bursts?, Choices: [{text: Drizzle, correct: false, explanation: Drizzle is known for its light and continuous nature.}, {text: Shower, correct: true, explanation: Showers are defined by their short duration and intense rainfall.}, {text: Torrential, correct: false, explanation: Torrential rain refers to heavy, prolonged rainfall.}, {text: Monsoon, correct: false, explanation: Monsoon is a seasonal pattern of wind and rain, not a specific type of rain.}]} Obviously, your response should not be related to rain unless the notes are about rain. Use the example as a strict format as to how to respond with the question. Do not feel obligated to make the questions similar to this question. It does not have to be a question about the characteristic or something like that. It can be about anything from the content provided. In fact, it would actually be better if it was not a simple question that asks what is a characteristic... or which of the following is not...',
+              text: 'System prompt: You are a teacher who is helping students learn a specific subject. The student will provide on or multiple of the following: notes, summary, and/or a lesson for you to teach them. When you get the notes/summary/lesson you should give a difficult multiple choice question based solely on the information within the content provided to you. In addition, you should provide explanations for each answer choice as to why they are correct or incorrect. The format of this should be a dictionary similar to this example: {Question: Which type of rain is characterized by short, intense bursts?, Choices: [{text: Drizzle, correct: false, explanation: Drizzle is known for its light and continuous nature.}, {text: Shower, correct: true, explanation: Showers are defined by their short duration and intense rainfall.}, {text: Torrential, correct: false, explanation: Torrential rain refers to heavy, prolonged rainfall.}, {text: Monsoon, correct: false, explanation: Monsoon is a seasonal pattern of wind and rain, not a specific type of rain.}]} Obviously, your response should not be related to rain unless the notes are about rain. Use the example as a strict format as to how to respond with the question. Do not feel obligated to make the questions similar to this question. It does not have to be a question about the characteristic or something like that. It can be about anything from the content provided. In fact, it would actually be better if it was not a simple question that asks what is a characteristic... or which of the following is not...',
             },
           ],
         },
@@ -166,27 +165,55 @@ const MultipleChoice = ({ note, summary, lesson, setCurrentQuestion, answersSele
           setCorrectAnswer(numToChar[i]);
         }
       }
-      setIsCorrect(null);
+      setSelectedAnswer(null);
       setAnswersSelected([]);
-      setQuestionResult('');
       setIsLoading(false);
     }
   }, [question]);
 
-  const checkCorrect = (selectedValue) => {
-    setAnswersSelected((oldAnswersSelected) => [...oldAnswersSelected, selectedValue]);
+  const handleAnswerSelection = (selectedValue) => {
+    setSelectedAnswer(selectedValue);
     if (selectedValue === correctAnswer) {
-      setIsCorrect(true);
-      setQuestionResult('CORRECT');
+      setAnswersSelected(['A', 'B', 'C', 'D'])
     } else {
-      setIsCorrect(false);
-      setQuestionResult('INCORRECT');
+    setAnswersSelected((oldAnswersSelected) => [...new Set([...oldAnswersSelected, selectedValue])]);
     }
   };
 
   const handleNext = () => {
-    setIsLoading(true); // Set loading to true to show the loader
-    setFetchNewQuestion(true); // Set the flag to fetch a new question
+    setIsLoading(true);
+    setFetchNewQuestion(true);
+  };
+
+  const formatResponseText = (text) => {
+    // Replace **text** with <b>text</b> for bold
+    text = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+    text = text.replace(/\*(.*?)\*/g, '<b>$1</b>');
+
+    // Replace # text with <h1>text</h1>, ## text with <h2>text</h2>, and ### text with <h3>text</h3>
+    text = text.replace(/^(#{1,6})\s*(.*?)$/gm, (match, hashes, content) => {
+        const level = hashes.length; // Count the number of hashes
+        return `<h${level}>${content.trim()}</h${level}>`; // Return the corresponding heading
+    });
+
+    // Handle bullet points
+    const lines = text.split('\n'); // Split by line
+    let formattedText = '<ul>'; // Start an unordered list
+
+    lines.forEach(line => {
+        if (line.trim().startsWith('* ')) {
+            // If the line starts with '* ', treat it as a bullet point
+            const bulletPoint = line.replace(/^\*\s*/, ''); // Remove the '* ' from the start
+            formattedText += `<li>${bulletPoint.trim()}</li>`; // Add it as a list item
+        } else {
+            // For non-bullet lines, just add them as paragraphs
+            formattedText += `<p>${line.trim()}</p>`;
+        }
+    });
+
+    formattedText += '</ul>'; // Close the unordered list
+
+    return formattedText;
   };
 
   return (
@@ -198,7 +225,7 @@ const MultipleChoice = ({ note, summary, lesson, setCurrentQuestion, answersSele
               <div className="mcq-valid">
                 <div className="separator">
                   <div className="question-prompt-container">
-                    <h3 className="question-prompt">{question['Question']}</h3>
+                    <h3 className="question-prompt" dangerouslySetInnerHTML={{ __html: formatResponseText(question['Question']) }} />
                   </div>
                   <div className="choice-container">
                     <ul className="choices">
@@ -209,8 +236,8 @@ const MultipleChoice = ({ note, summary, lesson, setCurrentQuestion, answersSele
                               type="radio"
                               name="choice"
                               value={numToChar[index]}
-                              onChange={() => checkCorrect(numToChar[index])}
-                              disabled={isCorrect} // Disable only if the correct answer is selected
+                              onChange={() => handleAnswerSelection(numToChar[index])}
+                              checked={selectedAnswer === numToChar[index]}
                             />
                             <span>{choice['text']}</span>
                           </label>
@@ -220,62 +247,23 @@ const MultipleChoice = ({ note, summary, lesson, setCurrentQuestion, answersSele
                   </div>
                 </div>
                 <div className="explanation-container">
-                  {(answersSelected.includes('A') || isCorrect) && (
-                    <div className="explanation">
-                      {correctAnswer === 'A' ? (
-                        <span className="explanation-text">
-                          <b className="correct">A is correct:</b> {question['Choices'][0]['explanation']}
-                        </span>
-                      ) : (
-                        <span className="explanation-text">
-                          <b className="incorrect">A is incorrect:</b> {question['Choices'][0]['explanation']}
-                        </span>
-                      )}
+                  {answersSelected.map((answer) => (
+                    <div key={answer} className="explanation">
+                      <span className="explanation-text">
+                        <b className={answer === correctAnswer ? "correct" : "incorrect"}>
+                          {answer} is {answer === correctAnswer ? "correct" : "incorrect"}:
+                        </b> {question['Choices'][numToChar.indexOf(answer)]['explanation']}
+                      </span>
                     </div>
-                  )}
-                  {(answersSelected.includes('B') || isCorrect) && (
-                    <div className="explanation">
-                      {correctAnswer === 'B' ? (
-                        <span className="explanation-text">
-                          <b className="correct">B is correct:</b> {question['Choices'][1]['explanation']}
-                        </span>
-                      ) : (
-                        <span className="explanation-text">
-                          <b className="incorrect">B is incorrect:</b> {question['Choices'][1]['explanation']}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                  {(answersSelected.includes('C') || isCorrect) && (
-                    <div className="explanation">
-                      {correctAnswer === 'C' ? (
-                        <span className="explanation-text">
-                          <b className="correct">C is correct:</b> {question['Choices'][2]['explanation']}
-                        </span>
-                      ) : (
-                        <span className="explanation-text">
-                          <b className="incorrect">C is incorrect:</b> {question['Choices'][2]['explanation']}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                  {(answersSelected.includes('D') || isCorrect) && (
-                    <div className="explanation">
-                      {correctAnswer === 'D' ? (
-                        <span className="explanation-text">
-                          <b className="correct">D is correct:</b> {question['Choices'][3]['explanation']}
-                        </span>
-                      ) : (
-                        <span className="explanation-text">
-                          <b className="incorrect">D is incorrect:</b> {question['Choices'][3]['explanation']}
-                        </span>
-                      )}
-                    </div>
-                  )}
+                  ))}
                 </div>
                 <div className="button-container">
-                  <button className="next-question-button" onClick={() => handleNext()}>
-                    {isCorrect ? 'Next' : 'Skip'}
+                  <button 
+                    className="next-question-button" 
+                    onClick={handleNext}
+                    disabled={!selectedAnswer}
+                  >
+                    {selectedAnswer === correctAnswer ? 'Next' : 'Skip'}
                   </button>
                 </div>
               </div>

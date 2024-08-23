@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import './Chatbot.css'
 import {ReactComponent as SendIcon} from '../assets/icons/send-icon.svg'
 
-const Chatbot = ({ note, currentQuestion, answersSelected, summary, lesson, currentLocation, messageToChat }) => {
+const Chatbot = ({ note, currentQuestion, answersSelected, summary, lesson, currentLocation, messageToChat, currentFlashCard, lookingAtTerm}) => {
   const [messages, setMessages] = useState([
     {
         role: 'user',
@@ -11,6 +11,7 @@ const Chatbot = ({ note, currentQuestion, answersSelected, summary, lesson, curr
             text: `System prompt: You are a teacher who is helping students learn a specific subject. 
             The student will ask you questions about notes they took on the subject and questions they have. 
             They may also ask for help when they are stuck on a question. They could also ask for help understanding a part of a lesson or summary.
+            They may even ask for help on ways to memorize/remember a certain flash card better.
             However, remember you are built into a web application and you must know which page the user is on in order to properly help them.
             You will be provided with the page. It will be one of the following: summary-page, lesson-page, multiple-choic-page, or flash-card-page.
             Each indicate what information is displayed on the screen.
@@ -50,7 +51,7 @@ const Chatbot = ({ note, currentQuestion, answersSelected, summary, lesson, curr
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             history: messages,
-            message: `Context: Note - ${note}, Current Question - ${JSON.stringify(currentQuestion)}, Answer Choices Selected Already from first to most recent - ${JSON.stringify(answersSelected)}, Summary - ${summary}, Lesson - ${lesson}, Current location on website - ${currentLocation}. User Query: ${temp_input}`
+            message: `Context: Note - ${note}, Current Question - ${JSON.stringify(currentQuestion)}, Answer Choices Selected Already from first to most recent - ${JSON.stringify(answersSelected)}, Summary - ${summary}, Lesson - ${lesson}, Current location on website - ${currentLocation}, Current Flash Card - ${JSON.stringify(currentFlashCard)}, Looking at the term of flash card - ${lookingAtTerm}. User Query: ${temp_input}`
           })
         })
 

@@ -74,6 +74,7 @@ const Note = ({ savedNote, setSavedNote, setCurrentLocation, pdfFile, setPdfFile
                     editNote={savedNote}
                     setEditNote={setSavedNote}
                     loading={loading}
+                    setLoading={setLoading}
                     isEditing={isEditing}
                     setIsEditing={setIsEditing}
                 />

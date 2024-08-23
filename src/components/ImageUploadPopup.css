@@ -1,0 +1,60 @@
+.image-upload-popup {
+    position: absolute; /* Position it absolutely */
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000; /* Ensure it appears above other elements */
+    width: 250px; /* Set a fixed width for the popup */
+    top: 40vh;
+    left: 22vw;
+  }
+  
+  .popup-content {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .error {
+    color: red;
+    margin-top: 10px;
+  }
+
+  .popup-close-button {
+    position: absolute;
+    top: 0.5vh;
+    right: 0.5vw;
+    padding: 0px; /* Adjust padding for better alignment */
+    background-color: transparent;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 2;
+    box-shadow: 0 0px 0px rgba(0, 0, 0, 0.2);
+}
+
+.close-icon {
+    width: 20px; /* Adjust size as needed */
+    height: 20px; /* Adjust size as needed */
+    fill: #ffffff;
+    transition: 0.3s ease;
+}
+
+.popup-close-button:hover {
+    background-color: transparent;
+    box-shadow: 0 0px 0px rgba(0, 0, 0, 0.2);
+}
+
+.extract-button {
+    padding: 2px;
+    margin: 5px;
+    margin-top: 10px;
+}
+
+.popup-input {
+    margin: 10px 0; /* Add margin for spacing */
+    padding: 10px; /* Add padding for better touch targets */
+    border: 1px solid #c2c2c2; /* Border color */
+    border-radius: 8px; /* Rounded corners */
+    font-size: 14px; /* Font size */
+}

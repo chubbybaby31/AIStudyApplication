@@ -189,25 +189,80 @@ app.post('/gemini', async (req, res) => {
 app.post('/generate-notes', async (req, res) => {
     const { topic, subtopics, depth } = req.body;
 
-  try {
-    const prompt = `Create a set of notes on the topic of ${topic}, specifically focusing on the subtopics of ${subtopics}. 
-    The notes should be ${depth} in detail (out of basic, intermediat, and advanced).
-    If organization is needed, you can split the notes into subsections with subtitles, but be sure to use HTML tags/formatting to do so instead of using #s and *s.
-    Make sure your response does not at all include * or # and instead uses HTML tags to convey the same formatting. To remind you: <b> or <strong> is used for bolding,
-    <li> is used for a bullet point, and <p> is used for a paragraph. Please use those tags and other HTML tags rather than the #'s and the *'s.
-    Just because I am asking you to format it neatly does not mean you should write a summary. Ensure the response are notes and not a series of large bodies of text.`;
+    try {
+        const prompt = `Create a set of notes on the topic of ${topic}, specifically focusing on the subtopics of ${subtopics}. 
+        The notes should be ${depth} in detail (out of basic, intermediat, and advanced).
+        If organization is needed, you can split the notes into subsections with subtitles, but be sure to use HTML tags/formatting to do so instead of using #s and *s.
+        Make sure your response does not at all include * or # and instead uses HTML tags to convey the same formatting. To remind you: <b> or <strong> is used for bolding,
+        <li> is used for a bullet point, and <p> is used for a paragraph. Please use those tags and other HTML tags rather than the #'s and the *'s.
+        Just because I am asking you to format it neatly does not mean you should write a summary. Ensure the response are notes and not a series of large bodies of text.`;
 
-    const result = await model.generateContent([
-      { text: prompt }
-    ]);
+        const result = await model.generateContent([
+        { text: prompt }
+        ]);
 
-    const notes = result.response.text();
+        const notes = result.response.text();
 
-    res.json({ notes });
-  } catch (error) {
-    console.error('Error generating notes:', error);
-    res.status(500).json({ error: 'An error occurred while generating notes.' });
-  }
-  });
+        res.json({ notes });
+    } catch (error) {
+        console.error('Error generating notes:', error);
+        res.status(500).json({ error: 'An error occurred while generating notes.' });
+    }
+    });
+
+app.post('/extract-notes', async (req, res) => {
+    const { extract } = req.body;
+
+    try {
+        const prompt = `Convert the following text into notes. Ignore any weird characters. Some words may not have spaces between them or may be spelled incorrectly. Make sure
+        the notes you provide do not have such mistakes. The text may itself be notes, in which case simply respond with the same notes, fixing any grammatical or spelling errors.
+        You can also enhance the notes a bit if needed. If you notice a word does not seem right in the context, think of a word with close to the same spelling that would and use that in your response instead.
+        Just make sure everything you send makes sense, not just grammatically, but contextually given both the words and the overall topic. For example, it would not make sense to
+        be talking about limbs and anatomy when the topic is economics.
+        If organization is needed, you can split the notes into subsections with subtitles, but be sure to use HTML tags/formatting to do so instead of using #s and *s.
+        Make sure your response does not at all include * or # and instead uses HTML tags to convey the same formatting. To remind you: <b> or <strong> is used for bolding,
+        <li> is used for a bullet point, and <p> is used for a paragraph. Please use those tags and other HTML tags rather than the #'s and the *'s.
+        Just because I am asking you to format it neatly does not mean you should write a summary. Ensure the response are notes and not a series of large bodies of text.
+        The text may have some irrelevant information that is not about the topic. For example if the picture was from a textbook it may have some exercises/questions or credits;
+        please ignore such text. Also ensure that the response are notes with bullet points and subtitles to organize the bullets (if needed) and not multiple bodies of text.
+        Here is the text for you to convert to notes: ${extract}`;
+
+        const result = await model.generateContent([
+        { text: prompt }
+        ]);
+
+        const notes = result.response.text();
+
+        res.json({ notes });
+    } catch (error) {
+        console.error('Error generating notes:', error);
+        res.status(500).json({ error: 'An error occurred while generating notes.' });
+    }
+    });
+
+app.post('/generate-flash-cards', async (req, res) => {
+    const { note, summary, lesson, terms } = req.body;
+    try {
+        const prompt = `Create a list of exactly ${terms} flash cards. These flash cards should be based off of these notes: ${note}, this summary: ${summary}, and/or this lesson: ${lesson}.
+        You may not receive all of them (you may not recieve the notes, the summary, and the lesson). Each flash card should have a term and definition. If it is
+        a flash card about a concept, the term will be the name of the concept while the definition will be what the concept is. If the flash card is for vocabulary, the term should be the word
+        and the definition will be the word's definition. All flash cards should be formatted like a JSON like this: {"term": "Sample term", definition: "sample definition"}. Your final reponse
+        should be a list of these flashcards that is of length $${terms}. DO NOT ADD ANY ADDITIONAL FORMATTING other than what I have specified here. For example, do not add "JSON response:" or anything like that.
+        Also ensure that the number of terms (the length of the list in the response) is no greater and no less than ${terms}. Remember you are providing a service and you must be exact therefore it should be exactly ${terms} long.
+        Also if you are providing vocabular, make sure it is relevant to the topic and not just a word you found in the notes, summary, and/or lesson`;
+
+        const result = await model.generateContent([
+        { text: prompt }
+        ]);
+
+        const cards = result.response.text();
+
+        res.json({ cards });
+    } catch (error) {
+        console.error('Error generating notes:', error);
+        res.status(500).json({ error: 'An error occurred while generating notes.' });
+    }
+    });
+
 
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`))
