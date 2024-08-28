@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { collection, getDoc, doc } from "firebase/firestore";
+import { getDoc, doc } from "firebase/firestore";
 import { db } from '../firebase';
 import './Dashboard.css'
 import Note from './Note'
@@ -8,13 +8,15 @@ import Chatbot from './Chatbot'
 import Summary from './Summary'
 import Lesson from './Lesson'
 import FlashCards from './FlashCards'
+import Menu from './Menu';
+import Space from './Space';
 
 const Dashboard = ({ authUser }) => {
   const [pdfFile, setPdfFile] = useState(null);
   const [savedNote, setSavedNote] = useState("")
   const [currentQuestion, setCurrentQuestion] = useState("")
   const [answersSelected, setAnswersSelected] = useState([])
-  const [currentLocation, setCurrentLocation] = useState('note-page')
+  const [currentLocation, setCurrentLocation] = useState('menu-page')
   const [isPdf, setIsPdf] = useState(false)
   const [summary, setSummary] = useState('')
   const [lesson, setLesson] = useState('')
@@ -22,6 +24,7 @@ const Dashboard = ({ authUser }) => {
   const [currentFlashCard, setCurrentFlashCard] = useState({'term': 'Generate flash cards to see them here...', 'definition': 'Generate flash cards to see them here...'})
   const [lookingAtTerm, setLookingAtTerm] = useState(true)
   const [messageToChat, setMessageToChat] = useState("")
+  const [isNewSpace, setIsNewSpace] = useState(false)
   const docRef = doc(db, "users", authUser.uid)
 
   const readData = async () => {
@@ -155,7 +158,18 @@ const Dashboard = ({ authUser }) => {
             />
           </div>
         }
-        {currentLocation !== 'note-page' && <Chatbot 
+        {currentLocation === 'menu-page' && <Menu 
+          authUser={authUser}
+          setCurrentLocation={setCurrentLocation}
+          setIsNewSpace={setIsNewSpace}
+        />}
+        {currentLocation === 'new-space-page' && <Space 
+          authUser={authUser}
+          setCurrentLocation={setCurrentLocation}
+          isNewSpace={isNewSpace}
+          setIsNewSpace={setIsNewSpace}
+        />}
+        {(currentLocation !== 'note-page' && currentLocation !== 'menu-page' && currentLocation !== 'new-space-page') && <Chatbot 
           note={savedNote} 
           currentQuestion={currentQuestion} 
           answersSelected={answersSelected} 
