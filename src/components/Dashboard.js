@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react'
+import { collection, getDoc, doc } from "firebase/firestore";
+import { db } from '../firebase';
 import './Dashboard.css'
 import Note from './Note'
 import MultipleChoice from './MultipleChoice'
@@ -7,7 +9,7 @@ import Summary from './Summary'
 import Lesson from './Lesson'
 import FlashCards from './FlashCards'
 
-const Dashboard = () => {
+const Dashboard = ({ authUser }) => {
   const [pdfFile, setPdfFile] = useState(null);
   const [savedNote, setSavedNote] = useState("")
   const [currentQuestion, setCurrentQuestion] = useState("")
@@ -20,6 +22,25 @@ const Dashboard = () => {
   const [currentFlashCard, setCurrentFlashCard] = useState({'term': 'Generate flash cards to see them here...', 'definition': 'Generate flash cards to see them here...'})
   const [lookingAtTerm, setLookingAtTerm] = useState(true)
   const [messageToChat, setMessageToChat] = useState("")
+  const docRef = doc(db, "users", authUser.uid)
+
+  const readData = async () => {
+    try {
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        console.log("Document data:", docSnap.data());
+      } else {
+        console.log("No such document!");
+      }
+    } catch (error) {
+      console.log("Error getting document:", error);
+    }
+  }
+
+  useEffect(() => {
+    readData()
+  }, [])
 
   useEffect(() => {
     console.log(currentQuestion)

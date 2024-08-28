@@ -1,0 +1,60 @@
+import React, { useState } from "react";
+import { auth } from "../../firebase"
+import { createUserWithEmailAndPassword } from "firebase/auth"
+import { db } from '../../firebase';
+import { collection, addDoc, doc, getDoc, setDoc, updateDoc } from "firebase/firestore"
+
+
+const SignUp = () => {
+
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+
+    const updateDB = async (emailID, uid) => {
+        const userRef = doc(db, "users", uid);
+        try {
+            await setDoc(userRef, {
+                profile: {
+                    email: emailID,
+                    spaces: [],
+                },
+            });
+            console.log("Document successfully written!");
+        } catch (error) {
+            console.error("Error writing document: ", error);
+        }
+    };
+
+    const signUp = (e) => {
+        e.preventDefault()
+        createUserWithEmailAndPassword(auth, email, password).then((userCredential) => {
+            console.log(userCredential)
+            updateDB(userCredential["user"]["email"], userCredential["user"]["uid"])
+        }).catch((error) => {
+            console.log(error)
+        })
+    }
+
+    return (
+        <div className="sign-in-container">
+            <form onSubmit={signUp}>
+                <h1>Create Account</h1>
+                <input 
+                    type="email" 
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                ></input>
+                <input 
+                    type="password" 
+                    placeholder="Enter your password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                ></input>
+                <button type="submit">Sign Up</button>
+            </form>
+        </div>
+    )
+}
+
+export default SignUp
