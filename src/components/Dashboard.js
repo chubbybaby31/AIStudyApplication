@@ -25,6 +25,13 @@ const Dashboard = ({ authUser }) => {
   const [lookingAtTerm, setLookingAtTerm] = useState(true)
   const [messageToChat, setMessageToChat] = useState("")
   const [isNewSpace, setIsNewSpace] = useState(false)
+
+  const [document, setDocument] = useState("")
+  const [name, setName] = useState("")
+  const [terms, setTerms] = useState([])
+  const [summaries, setSummaries] = useState([])
+  const [lessons, setLessons] = useState([])
+
   const docRef = doc(db, "users", authUser.uid)
 
   const readData = async () => {
@@ -160,14 +167,26 @@ const Dashboard = ({ authUser }) => {
         }
         {currentLocation === 'menu-page' && <Menu 
           authUser={authUser}
+          docRef={docRef}
           setCurrentLocation={setCurrentLocation}
           setIsNewSpace={setIsNewSpace}
         />}
         {currentLocation === 'new-space-page' && <Space 
           authUser={authUser}
+          docRef={docRef}
           setCurrentLocation={setCurrentLocation}
           isNewSpace={isNewSpace}
           setIsNewSpace={setIsNewSpace}
+          name={name}
+          setName={setName}
+          document={document}
+          setDocument={setDocument}
+          terms={terms}
+          setTerms={setTerms}
+          summaries={summaries}
+          setSummaries={setSummaries}
+          lessons={lessons}
+          setLessons={setLessons}
         />}
         {(currentLocation !== 'note-page' && currentLocation !== 'menu-page' && currentLocation !== 'new-space-page') && <Chatbot 
           note={savedNote} 

@@ -1,7 +1,7 @@
 import React from "react";
 import './Menu.css'
 
-const Menu = ({ authUser, setCurrentLocation, setIsNewSpace }) => {
+const Menu = ({ authUser, docRef, setCurrentLocation, setIsNewSpace }) => {
 
     const handleNewSpace = () => {
         setIsNewSpace(true)
