@@ -101,3 +101,10 @@
     top: 4vh;
     left: 7vw;
   }
+
+  .main-save-button {
+    position: absolute;
+    bottom: 1vh;
+    right: 1vh;
+    cursor: pointer;
+  }

@@ -1,0 +1,210 @@
+.menu-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+}
+
+.side-nav {
+    width: 10vw;
+    height: 100%;
+    background-color: #f0f0f0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.side-nav button {
+    margin-bottom: 10px;
+    padding: 10px;
+    border: none;
+    background-color: #c6c6c6;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.side-nav button:hover {
+    background-color: #b0b0b0;
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+}
+
+.directory-container {
+    width: 45vw;
+    height: 100%;
+    overflow-y: auto;
+    padding: 20px;
+    border-left: 1px solid #ccc;
+}
+
+.notes-container {
+    width: 45vw;
+    height: 100%;
+    padding: 20px;
+}
+
+.add-container {
+    position: relative;
+}
+
+.add-options {
+    position: absolute;
+    top: 0;
+    left: 7.5vw;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.add-button {
+    width: 100%;
+}
+
+.add-options button {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.add-options button:hover {
+    background-color: #f1f1f1;
+}
+
+.component {
+    margin-bottom: 20px;
+    border-radius: 5px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.main-component {
+    padding: 15px;
+    background-color: #dedede;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+    text-align: left;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.delete-button {
+    font-size: 16px;
+    margin-left: 20px;
+    padding: 0;
+    background-color: transparent;
+    box-shadow: 0px 0px 0px 0px rgba(0,0,0,0.2);
+}
+
+.delete-button:hover {
+    background-color: transparent;
+    box-shadow: 0px 0px 0px 0px rgba(0,0,0,0.2);
+    font-size: 20px;
+    margin-left: 16px;
+}
+
+.main-component:hover {
+    background-color: #e0e0e0;
+}
+
+.section-header {
+    margin-bottom: 3vh;
+}
+
+.note-cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5vw;
+}
+
+.note-card {
+    margin-bottom: 20px;
+    border-radius: 8px;
+    width: 13vw;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease;
+}
+
+.note-card:hover {
+    box-shadow: 
+        0 0 10px #ff8383,
+        0 0 20px #ffab8c,
+        0 0 30px #ffcd93;
+}
+
+.note-preview-container {
+    width: 100%;
+    height: 150px; /* Keep the height as needed */
+    overflow: hidden;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    margin-bottom: 10px;
+    background-color: #fff;
+    position: relative;
+}
+
+.note-preview-content {
+    transform: scale(0.5); /* Scale down to 50% */
+    transform-origin: top left; /* Ensure scaling from the top-left corner */
+    width: 200%; /* Double the width to account for scaling */
+    height: 200%; /* Double the height to account for scaling */
+    padding: 20px;
+    padding-right: 40px;
+    font-size: 16px;
+    color: #333;
+    line-height: 1.6;
+    overflow: hidden;
+}
+
+.note-preview-content h2,
+.note-preview-content h3,
+.note-preview-content h4 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+}
+
+.note-preview-content p {
+    margin: 1em 0;
+}
+
+.note-preview-content ul {
+    margin: 1em 0;
+    padding-left: 20px;
+}
+
+.note-preview-content li {
+    margin-bottom: 0.5em;
+}
+
+.note-name {
+    font-size: 14px;
+    font-weight: bold;
+    width: 100%;
+    text-align: left;
+    margin-bottom: 10px;
+    margin-top: 5px;
+    margin-left: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

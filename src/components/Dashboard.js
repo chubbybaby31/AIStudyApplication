@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { getDoc, doc } from "firebase/firestore";
+import { getDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from '../firebase';
 import './Dashboard.css'
 import Note from './Note'
@@ -25,21 +25,87 @@ const Dashboard = ({ authUser }) => {
   const [lookingAtTerm, setLookingAtTerm] = useState(true)
   const [messageToChat, setMessageToChat] = useState("")
   const [isNewSpace, setIsNewSpace] = useState(false)
+  const [spaceID, setSpaceID] = useState("")
 
   const [document, setDocument] = useState("")
   const [name, setName] = useState("")
   const [terms, setTerms] = useState([])
   const [summaries, setSummaries] = useState([])
   const [lessons, setLessons] = useState([])
+  const [spaces, setSpaces] = useState([])
+  const [fileSystem, setFileSystem] = useState("")
+  const [pathToNote, setPathToNote] = useState("")
+  const [noteName, setNoteName] = useState("")
+  const [initialValues, setInitialValues] = useState({note: "", summary: "", lesson: "", terms: []})
+  const [currentValues, setCurrentValues] = useState({note: "", summary: "", lesson: "", terms: []})
 
   const docRef = doc(db, "users", authUser.uid)
+
+  const updateNote = () => {
+    let updatedFileSystem = JSON.parse(JSON.stringify(fileSystem)); // Deep copy
+    const newNote = {
+        name: noteName,
+        type: "note",
+        content: savedNote,
+        summary: summary,
+        lesson: lesson,
+        terms: flashCards,
+        test: []
+    };
+
+    if (pathToNote && pathToNote.length > 0) {
+        // Function to recursively traverse the file system
+        const updateNoteAtPath = (items, pathIndex) => {
+            if (pathIndex === pathToNote.length) {
+                // Find the index of the existing note with the same name
+                const noteIndex = items.findIndex(item => item.name === noteName && item.type === "note");
+                if (noteIndex !== -1) {
+                    // Replace the existing note
+                    items[noteIndex] = newNote;
+                } else {
+                    console.error("Note does not exist")
+                }
+                return items;
+            }
+            const folder = items.find(item => item.name === pathToNote[pathIndex] && item.type === "folder");
+            if (folder) {
+                folder.content = updateNoteAtPath(folder.content, pathIndex + 1);
+            }
+            return items;
+        };
+
+        updatedFileSystem = updateNoteAtPath(updatedFileSystem, 0);
+    } else {
+        // If no path, replace or add to root
+        const noteIndex = updatedFileSystem.findIndex(item => item.name === noteName && item.type === "note");
+        if (noteIndex !== -1) {
+            // Replace the existing note
+            updatedFileSystem[noteIndex] = newNote;
+        } else {
+            console.error("Note does not exist")
+        }
+    }
+
+    updateDoc(docRef, {
+        profile: {
+            email: authUser.email,
+            root: updatedFileSystem
+        }
+    }).then(() => {
+        console.log("Successful Save");
+        setFileSystem(updatedFileSystem);
+    }).catch((error) => {
+        console.log(error);
+    });
+};
 
   const readData = async () => {
     try {
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
-        console.log("Document data:", docSnap.data());
+        console.log("Document data:", docSnap.data().profile.root);
+        setFileSystem(docSnap.data().profile.root)
       } else {
         console.log("No such document!");
       }
@@ -55,6 +121,11 @@ const Dashboard = ({ authUser }) => {
   useEffect(() => {
     console.log(currentQuestion)
   }, [currentQuestion])
+
+  useEffect(() => {
+    setCurrentValues({note: savedNote, summary: summary, lesson: lesson, terms: flashCards})
+    console.log(initialValues.note === currentValues.note && initialValues.summary === currentValues.summary && initialValues.lesson === currentValues.lesson && initialValues.terms === currentValues.terms)
+  }, [savedNote, summary, lesson, flashCards])
 
   return (
     <div className="dashboard">
@@ -170,8 +241,19 @@ const Dashboard = ({ authUser }) => {
           docRef={docRef}
           setCurrentLocation={setCurrentLocation}
           setIsNewSpace={setIsNewSpace}
+          spaces={spaces}
+          setSpaceID={setSpaceID}
+          fileSystem={fileSystem}
+          setFileSystem={setFileSystem}
+          setSavedNote={setSavedNote}
+          setSummary={setSummary}
+          setLesson={setLesson}
+          setFlashCards={setFlashCards}
+          setNoteName={setNoteName}
+          setPathToNote={setPathToNote}
+          setInitialValues={setInitialValues}
         />}
-        {currentLocation === 'new-space-page' && <Space 
+        {currentLocation === 'space-page' && <Space 
           authUser={authUser}
           docRef={docRef}
           setCurrentLocation={setCurrentLocation}
@@ -187,8 +269,12 @@ const Dashboard = ({ authUser }) => {
           setSummaries={setSummaries}
           lessons={lessons}
           setLessons={setLessons}
+          spaces={spaces}
+          setSpaces={setSpaces}
+          spaceID={spaceID}
+          setSpaceID={setSpaceID}
         />}
-        {(currentLocation !== 'note-page' && currentLocation !== 'menu-page' && currentLocation !== 'new-space-page') && <Chatbot 
+        {(currentLocation !== 'note-page' && currentLocation !== 'menu-page' && currentLocation !== 'space-page') && <Chatbot 
           note={savedNote} 
           currentQuestion={currentQuestion} 
           answersSelected={answersSelected} 
@@ -200,6 +286,12 @@ const Dashboard = ({ authUser }) => {
           lookingAtTerm={lookingAtTerm}
         />}
       </div>
+      {currentLocation !== 'menu-page' &&
+      <button 
+        className="main-save-button" 
+        disabled={initialValues.note === currentValues.note && initialValues.summary === currentValues.summary && initialValues.lesson === currentValues.lesson && initialValues.terms === currentValues.terms} 
+        onClick={updateNote}>Save</button>
+      }
     </div>
   )
 }

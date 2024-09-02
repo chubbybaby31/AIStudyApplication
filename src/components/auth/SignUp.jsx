@@ -16,7 +16,7 @@ const SignUp = () => {
             await setDoc(userRef, {
                 profile: {
                     email: emailID,
-                    spaces: [],
+                    root: [],
                 },
             });
             console.log("Document successfully written!");
