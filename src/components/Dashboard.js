@@ -9,7 +9,6 @@ import Summary from './Summary'
 import Lesson from './Lesson'
 import FlashCards from './FlashCards'
 import Menu from './Menu';
-import Space from './Space';
 
 const Dashboard = ({ authUser }) => {
   const [pdfFile, setPdfFile] = useState(null);
@@ -24,15 +23,7 @@ const Dashboard = ({ authUser }) => {
   const [currentFlashCard, setCurrentFlashCard] = useState({'term': 'Generate flash cards to see them here...', 'definition': 'Generate flash cards to see them here...'})
   const [lookingAtTerm, setLookingAtTerm] = useState(true)
   const [messageToChat, setMessageToChat] = useState("")
-  const [isNewSpace, setIsNewSpace] = useState(false)
-  const [spaceID, setSpaceID] = useState("")
 
-  const [document, setDocument] = useState("")
-  const [name, setName] = useState("")
-  const [terms, setTerms] = useState([])
-  const [summaries, setSummaries] = useState([])
-  const [lessons, setLessons] = useState([])
-  const [spaces, setSpaces] = useState([])
   const [fileSystem, setFileSystem] = useState("")
   const [pathToNote, setPathToNote] = useState("")
   const [noteName, setNoteName] = useState("")
@@ -42,6 +33,7 @@ const Dashboard = ({ authUser }) => {
   const docRef = doc(db, "users", authUser.uid)
 
   const updateNote = () => {
+    console.log(pathToNote);
     let updatedFileSystem = JSON.parse(JSON.stringify(fileSystem)); // Deep copy
     const newNote = {
         name: noteName,
@@ -63,13 +55,20 @@ const Dashboard = ({ authUser }) => {
                     // Replace the existing note
                     items[noteIndex] = newNote;
                 } else {
-                    console.error("Note does not exist")
+                    console.error("Note does not exist");
                 }
                 return items;
             }
+
             const folder = items.find(item => item.name === pathToNote[pathIndex] && item.type === "folder");
+            const document = items.find(item => item.name === pathToNote[pathIndex] && item.type === "document");
+
             if (folder) {
                 folder.content = updateNoteAtPath(folder.content, pathIndex + 1);
+            } else if (document) {
+                document.notes = updateNoteAtPath(document.notes, pathIndex + 1);
+            } else {
+                console.error("Path not found or invalid structure:", pathToNote.slice(0, pathIndex + 1));
             }
             return items;
         };
@@ -82,7 +81,7 @@ const Dashboard = ({ authUser }) => {
             // Replace the existing note
             updatedFileSystem[noteIndex] = newNote;
         } else {
-            console.error("Note does not exist")
+            console.error("Note does not exist");
         }
     }
 
@@ -95,11 +94,11 @@ const Dashboard = ({ authUser }) => {
         console.log("Successful Save");
         setFileSystem(updatedFileSystem);
     }).catch((error) => {
-        console.log(error);
+        console.log("Error updating document:", error);
     });
 
-    setInitialValues(currentValues)
-};
+    setInitialValues(currentValues);
+  };
 
   const readData = async () => {
     try {
@@ -241,9 +240,6 @@ const Dashboard = ({ authUser }) => {
           authUser={authUser}
           docRef={docRef}
           setCurrentLocation={setCurrentLocation}
-          setIsNewSpace={setIsNewSpace}
-          spaces={spaces}
-          setSpaceID={setSpaceID}
           fileSystem={fileSystem}
           setFileSystem={setFileSystem}
           setSavedNote={setSavedNote}
@@ -254,28 +250,7 @@ const Dashboard = ({ authUser }) => {
           setPathToNote={setPathToNote}
           setInitialValues={setInitialValues}
         />}
-        {currentLocation === 'space-page' && <Space 
-          authUser={authUser}
-          docRef={docRef}
-          setCurrentLocation={setCurrentLocation}
-          isNewSpace={isNewSpace}
-          setIsNewSpace={setIsNewSpace}
-          name={name}
-          setName={setName}
-          document={document}
-          setDocument={setDocument}
-          terms={terms}
-          setTerms={setTerms}
-          summaries={summaries}
-          setSummaries={setSummaries}
-          lessons={lessons}
-          setLessons={setLessons}
-          spaces={spaces}
-          setSpaces={setSpaces}
-          spaceID={spaceID}
-          setSpaceID={setSpaceID}
-        />}
-        {(currentLocation !== 'note-page' && currentLocation !== 'menu-page' && currentLocation !== 'space-page') && <Chatbot 
+        {(currentLocation !== 'note-page' && currentLocation !== 'menu-page') && <Chatbot 
           note={savedNote} 
           currentQuestion={currentQuestion} 
           answersSelected={answersSelected} 
