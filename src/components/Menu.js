@@ -273,20 +273,36 @@ const Menu = ({ authUser, docRef, setCurrentLocation, setIsNewSpace, spaces, set
             </div>
             <div className="main-content">
                 <div className="directory-container">
-                    <h2 className="section-header">Study Spaces and Folders</h2>
-                    {currentItems.filter(item => item.type !== 'note').map((item, index) => (
-                        <div className="component">
-                        <button key={index} className="main-component" onClick={() => setPath([...path, item.name])}>
-                            <div className="component-name">{item.name}</div>
-                            <div className="component-type"><b>Type:</b> {item.type}</div>
-                        </button>
-                        <button className="delete-button">🗑️</button>
-                        </div>
-                    ))}
+                    <div className="space-container">
+                        <h2 className="section-header">Study Spaces</h2>
+                        {currentItems.filter(item => item.type === 'space').map((item, index) => (
+                            <div className="component">
+                            <button key={index} className="main-component" onClick={() => setPath([...path, item.name])}>
+                                <div className="component-name">{item.name}</div>
+                            </button>
+                            <button className="delete-button">🗑️</button>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="folders-container">
+                        <h2 className="section-header">Folders</h2>
+                        {currentItems.filter(item => item.type === 'folder').map((item, index) => (
+                            <div className="component">
+                            <button key={index} className="main-component" onClick={() => setPath([...path, item.name])}>
+                                <div className="component-name">{item.name}</div>
+                            </button>
+                            <button className="delete-button">🗑️</button>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
             {namePopup && 
             <div className="name-directory">
+                <div className="name-popup-header">
+                    <h2>Enter Name</h2>
+                    <button className="close-name-popup-button" onClick={() => setComponentToAdd("")}>X</button>
+                </div>
                 <form className="name-form" onSubmit={handleAddItem}>
                     <input className="name-entry" value={newName} onChange={(e) => setNewName(e.target.value)}/>
                     <button type="submit">+</button>

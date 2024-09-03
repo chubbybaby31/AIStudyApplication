@@ -35,7 +35,6 @@
 .directory-container {
     width: 45vw;
     height: 100%;
-    overflow-y: auto;
     padding: 20px;
     border-left: 1px solid #ccc;
 }
@@ -207,4 +206,58 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.name-directory {
+    position: absolute;
+    background-color: white;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+}
+
+.close-name-popup-button {
+    box-shadow: 0px 0px 0px 0px rgba(0,0,0,0.2);
+    background-color: transparent;
+    padding: 0;
+    margin-right: 10px;
+}
+
+.close-name-popup-button:hover {
+    box-shadow: 0px 0px 0px 0px rgba(0,0,0,0.2);
+    background-color: transparent;
+    font-weight: 600;
+}
+
+.name-popup-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.name-form button {
+    font-size: 25px;
+    padding: 0px;
+    padding-inline: 8px;
+    padding-bottom: 2px;
+    border-radius: 100%;
+    margin-left: 10px;
+}
+
+.name-entry {
+    height: 20px;
+}
+
+.space-container{
+    height: 49vh;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 2vh;
+    overflow-y: scroll;
+}
+
+.folders-container {
+    height: 49vh;
+    overflow-y: scroll;
 }

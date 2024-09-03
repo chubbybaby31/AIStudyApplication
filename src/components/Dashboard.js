@@ -97,6 +97,8 @@ const Dashboard = ({ authUser }) => {
     }).catch((error) => {
         console.log(error);
     });
+
+    setInitialValues(currentValues)
 };
 
   const readData = async () => {
@@ -124,8 +126,7 @@ const Dashboard = ({ authUser }) => {
 
   useEffect(() => {
     setCurrentValues({note: savedNote, summary: summary, lesson: lesson, terms: flashCards})
-    console.log(initialValues.note === currentValues.note && initialValues.summary === currentValues.summary && initialValues.lesson === currentValues.lesson && initialValues.terms === currentValues.terms)
-  }, [savedNote, summary, lesson, flashCards])
+  }, [savedNote, summary, lesson, flashCards, currentLocation])
 
   return (
     <div className="dashboard">
@@ -173,7 +174,7 @@ const Dashboard = ({ authUser }) => {
             </div>
         </nav>
       }
-      <div className={`main-body ${currentLocation === 'note-page' ? 'note-page' : 'other-page'}`}>
+      <div className={`main-body ${currentLocation === 'note-page' || currentLocation === 'menu-page' ? 'note-page' : 'other-page'}`}>
         {currentLocation === 'note-page' && <Note 
           savedNote={savedNote} 
           setSavedNote={setSavedNote} 

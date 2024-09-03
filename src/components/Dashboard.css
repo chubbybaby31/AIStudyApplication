@@ -108,3 +108,9 @@
     right: 1vh;
     cursor: pointer;
   }
+
+  .main-save-button:disabled {
+    background-color: #bbbbbb;
+    box-shadow: 0 0px 0px rgba(0, 0, 0, 0.2);
+    cursor: auto;
+  }
