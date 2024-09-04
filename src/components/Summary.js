@@ -2,12 +2,15 @@ import React, { useEffect, useState } from 'react';
 import './Summary.css';
 import axios from 'axios';
 import { ReactComponent as RefreshIcon } from '../assets/icons/refresh-icon.svg';
+import GenerateSummary from './GenerateSummary';
 
 const Summary = ({ pdfFile, savedNote, isPdfSummary, summary, setSummary, setMessageToChat }) => {
     const [loading, setLoading] = useState(false);
     const [popupVisible, setPopupVisible] = useState(false);
     const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
     const [selectedText, setSelectedText] = useState('');
+    const [showOptions, setShowOptions] = useState(false);
+    const [showGenerateSummary, setShowGenerateSummary] = useState(false);
 
     const handleUploadSummarize = async () => {
         if (!pdfFile) {
@@ -81,21 +84,18 @@ const Summary = ({ pdfFile, savedNote, isPdfSummary, summary, setSummary, setMes
         }
     };
 
-    useEffect(() => {
-        if (summary === "") {
-            if (isPdfSummary) {
-                handleUploadSummarize();
-            } else {
-                handleNoteSummarize();
-            }
-        }
-    }, [isPdfSummary]);
+    const handleTopicSummarize = () => {
+        setShowGenerateSummary(true);
+    };
 
-    const newSummary = () => {
-        if (isPdfSummary) {
+    const newSummary = (type) => {
+        setShowOptions(false);
+        if (type === 'pdf') {
             handleUploadSummarize();
-        } else {
+        } else if (type === 'notes') {
             handleNoteSummarize();
+        } else if (type === 'topic') {
+            handleTopicSummarize();
         }
     }
 
@@ -171,6 +171,22 @@ const Summary = ({ pdfFile, savedNote, isPdfSummary, summary, setSummary, setMes
         <div>
             <div className="summary-container" onMouseUp={handleTextSelection}>
                 <div 
+                    className="summary-options"
+                    onMouseEnter={() => setShowOptions(true)}
+                    onMouseLeave={() => setShowOptions(false)}
+                >
+                    <button className="summary-options-button">
+                        Generate Summary
+                    </button>
+                    {showOptions && (
+                        <div className="summary-options-popup">
+                            <button onClick={() => newSummary('notes')}>Summary from Notes</button>
+                            <button onClick={() => newSummary('topic')}>Summary from Topic</button>
+                            <button onClick={() => newSummary('pdf')}>Summary from PDF</button>
+                        </div>
+                    )}
+                </div>
+                <div 
                     className="summary-content" 
                     dangerouslySetInnerHTML={{ __html: formatResponseText(summary) }} 
                 />
@@ -179,11 +195,17 @@ const Summary = ({ pdfFile, savedNote, isPdfSummary, summary, setSummary, setMes
                         <button onClick={handleAskAI}>Ask AI</button>
                     </div>
                 )}
-                <button className="new-summary-button" onClick={() => newSummary()}>
-                    <RefreshIcon className='refresh-icon' />
-                </button>
                 {loading && <div className="loader-summary"></div>}
             </div>
+            {showGenerateSummary && (
+                <div className="generate-summary-overlay">
+                    <GenerateSummary 
+                        setSummary={setSummary}
+                        setLoading={setLoading}
+                        onClose={() => setShowGenerateSummary(false)}
+                    />
+                </div>
+            )}
         </div>
     );
 };

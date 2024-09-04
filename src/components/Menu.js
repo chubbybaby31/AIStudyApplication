@@ -202,13 +202,18 @@ const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem,
         const newItem = {
             name: newName,
             type: itemType,
-            content: "",
         };
     
         if (itemType === 'terms') {
             newItem.terms = [];
         } else if (itemType === 'test') {
             newItem.questions = [];
+        } else if (itemType === 'lesson') {
+            newItem.lesson = ""
+        } else if (itemType === 'summary') {
+            newItem.summary = ""
+        } else {
+            newItem.content = ""
         }
     
         updatedFileSystem.push(newItem);
@@ -233,17 +238,17 @@ const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem,
                 handleNoteClick(item, 'note');
                 break;
             case 'lesson':
-                setLesson(item.content);
+                setLesson(item.lesson);
                 setNoteName(item.name);
                 setPathToNote([]);
-                setInitialValues({ note: '', summary: '', lesson: item.content, terms: [] });
+                setInitialValues({ note: '', summary: '', lesson: item.lesson, terms: [] });
                 setCurrentLocation("lesson-page");
                 break;
             case 'summary':
-                setSummary(item.content);
+                setSummary(item.summary);
                 setNoteName(item.name);
                 setPathToNote([]);
-                setInitialValues({ note: '', summary: item.content, lesson: '', terms: [] });
+                setInitialValues({ note: '', summary: item.summary, lesson: '', terms: [] });
                 setCurrentLocation("summary-page");
                 break;
             case 'terms':

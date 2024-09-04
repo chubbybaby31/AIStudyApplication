@@ -264,5 +264,63 @@ app.post('/generate-flash-cards', async (req, res) => {
     }
     });
 
+app.post('/generate-lesson', async (req, res) => {
+    const { topic, subtopics } = req.body;
+
+    try {
+        const prompt = `Can you write a detailed lesson as if you were a teacher teaching about this topic: ${topic} and these subtopics: ${subtopics}. 
+        Your lesson should seamlessly transition between topics and should be written as a body of text 
+        (not bullet points, however, it can contain bullet points if necessary). Be sure to include key concepts and vocabulary, along with all important equations. 
+        Make sure to explain each concept in depth and add analogies if you think the concept you are trying to teach
+        would be too difficult to understand without one. Do not abuse the analogies though as it will become obvious.
+        Refrain from using very high level wording to make the lesson easier to understand. The lesson should be quite lengthy, longer than a summary.
+        It must be 900+ words. Do not say hello class or anything like that.
+        If organization is needed, you can split the lesson into subsections with subtitles, but be sure to use HTML tags/formatting to do so.
+        Make sure your response does not at all include * or # and instead uses HTML tags to convey the same formatting. To remind you: <b> or <strong> is used for bolding,
+        <li> is used for a bullet point, and <p> is used for a paragraph. Please use those tags and other HTML tags rather than the #'s and the *'s.
+        Make sure there is an h2 title.`;
+
+        const result = await model.generateContent([
+        { text: prompt }
+        ]);
+
+        const lesson = result.response.text();
+
+        res.json({ lesson });
+    } catch (error) {
+        console.error('Error generating notes:', error);
+        res.status(500).json({ error: 'An error occurred while generating notes.' });
+    }
+    });
+
+app.post('/generate-summary', async (req, res) => {
+    const { topic, subtopics } = req.body;
+
+    try {
+        const prompt = `Can you create a detailed summary of this topic: ${topic} and these subtopics: ${subtopics} making sure not to leave out any important equations and/or vocabulary terms. 
+        The summary should be a body of text that can be separated by main ideas, but it should not be bullet points.
+        Make sure all the core concepts are mentioned. This should be as if you are a teacher who is teaching a struggling student about the topic. 
+        Make sure the summary does not exceed the length of the 500 words and the length of the text in the document. 
+        Essentially, the summary should not be more than 500 words.
+        Do not add anything extra other than the summary. For example, do not add "sure here is a summary for you:" in your response. 
+        If necessary, format the summary into sections with subtitles. Also be sure to include proper spacing as needed.
+        If organization is needed, you can split the summary into subsections with subtitles, but be sure to use HTML tags/formatting to do so.
+        Make sure your response does not at all include * or # and instead uses HTML tags to convey the same formatting. To remind you: <b> or <strong> is used for bolding,
+        <li> is used for a bullet point, and <p> is used for a paragraph. Please use those tags and other HTML tags rather than the #'s and the *'s.
+        Make sure there is a h2 title.`;
+
+        const result = await model.generateContent([
+        { text: prompt }
+        ]);
+
+        const summary = result.response.text();
+
+        res.json({ summary });
+    } catch (error) {
+        console.error('Error generating notes:', error);
+        res.status(500).json({ error: 'An error occurred while generating notes.' });
+    }
+    });
+
 
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`))

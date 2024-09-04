@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './Lesson.css';
 import axios from 'axios';
 import { ReactComponent as RefreshIcon } from '../assets/icons/refresh-icon.svg';
+import GenerateLesson from './GenerateLesson';
 
 const Lesson = ({ pdfFile, savedNote, isPdfLesson, lesson, setLesson, setCurrentLocation, setMessageToChat }) => {
     const [loading, setLoading] = useState(false);
     const [popupVisible, setPopupVisible] = useState(false);
     const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
     const [selectedText, setSelectedText] = useState('');
+    const [showOptions, setShowOptions] = useState(false);
+    const [showGenerateLesson, setShowGenerateLesson] = useState(false);
 
     const handleUploadLesson = async () => {
         if (!pdfFile) {
@@ -19,7 +22,7 @@ const Lesson = ({ pdfFile, savedNote, isPdfLesson, lesson, setLesson, setCurrent
         formData.append('pdf', pdfFile);
 
         try {
-            setLoading(true); // Set loading to true
+            setLoading(true);
             const response = await axios.post('http://localhost:8000/lesson', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
@@ -31,13 +34,13 @@ const Lesson = ({ pdfFile, savedNote, isPdfLesson, lesson, setLesson, setCurrent
             console.error('Error uploading PDF:', error);
             alert('An error occurred while uploading the PDF. Please try again.');
         } finally {
-            setLoading(false); // Set loading to false after the request completes
+            setLoading(false);
         }
     };
 
     const handleNoteLesson = async () => {
         try {
-            setLoading(true); // Set loading to true
+            setLoading(true);
             const options = {
                 method: 'POST',
                 body: JSON.stringify({
@@ -77,25 +80,22 @@ const Lesson = ({ pdfFile, savedNote, isPdfLesson, lesson, setLesson, setCurrent
         } catch (error) {
             setLesson("## There was an error summarizing, try again later.");
         } finally {
-            setLoading(false); // Set loading to false after the request completes
+            setLoading(false);
         }
     };
 
-    useEffect(() => {
-        if (lesson === "") {
-            if (isPdfLesson) {
-                handleUploadLesson();
-            } else {
-                handleNoteLesson();
-            }
-        }
-    }, [isPdfLesson]);
+    const handleTopicLesson = async () => {
+        setShowGenerateLesson(true);
+    };
 
-    const newLesson = () => {
-        if (isPdfLesson) {
+    const newLesson = (type) => {
+        setShowOptions(false);
+        if (type === 'pdf') {
             handleUploadLesson();
-        } else {
+        } else if (type === 'notes') {
             handleNoteLesson();
+        } else if (type === 'topic') {
+            handleTopicLesson();
         }
     }
 
@@ -115,26 +115,10 @@ const Lesson = ({ pdfFile, savedNote, isPdfLesson, lesson, setLesson, setCurrent
     const handleAskAI = () => {
         if (selectedText) {
             const message = `Please explain/define this section: "${selectedText}"`;
-            setMessageToChat(message); // Function to send message to the chat
-            setPopupVisible(false); // Hide the popup after sending the message
+            setMessageToChat(message);
+            setPopupVisible(false);
         }
     };
-
-    useEffect(() => {
-        const handleMouseDown = (event) => {
-            const selection = window.getSelection();
-            if (!selection.isCollapsed) {
-                return;
-            }
-            setPopupVisible(false);
-        };
-
-        document.addEventListener('mousedown', handleMouseDown);
-
-        return () => {
-            document.removeEventListener('mousedown', handleMouseDown);
-        };
-    }, []);
 
     const formatResponseText = (text) => {
         // Replace **text** with <b>text</b> for bold
@@ -171,6 +155,22 @@ const Lesson = ({ pdfFile, savedNote, isPdfLesson, lesson, setLesson, setCurrent
         <div>
             <div className="lesson-container" onMouseUp={handleTextSelection}>
                 <div 
+                    className="lesson-options"
+                    onMouseEnter={() => setShowOptions(true)}
+                    onMouseLeave={() => setShowOptions(false)}
+                >
+                    <button className="lesson-options-button">
+                        Generate Lesson
+                    </button>
+                    {showOptions && (
+                        <div className="lesson-options-popup">
+                            <button onClick={() => newLesson('notes')}>Lesson from Notes</button>
+                            <button onClick={() => newLesson('topic')}>Lesson from Topic</button>
+                            <button onClick={() => newLesson('pdf')}>Lesson from PDF</button>
+                        </div>
+                    )}
+                </div>
+                <div 
                     className="lesson-content" 
                     dangerouslySetInnerHTML={{ __html: formatResponseText(lesson) }} 
                 />
@@ -179,13 +179,20 @@ const Lesson = ({ pdfFile, savedNote, isPdfLesson, lesson, setLesson, setCurrent
                         <button onClick={handleAskAI}>Ask AI</button>
                     </div>
                 )}
-                <button className="new-lesson-button" onClick={() => newLesson()}>
-                    <RefreshIcon className='refresh-icon' />
-                </button>
                 {loading && <div className="loader-lesson"></div>}
             </div>
+            {showGenerateLesson && (
+                <div className="generate-lesson-overlay">
+                    <GenerateLesson 
+                        setLesson={setLesson}
+                        setLoading={setLoading}
+                        onClose={() => setShowGenerateLesson(false)}
+                    />
+                </div>
+            )}
         </div>
     );
+
 };
 
 export default Lesson;
