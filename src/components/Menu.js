@@ -140,27 +140,129 @@ const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem,
         setCurrentItems(tempItems);
     }, [fileSystem, path]);
 
-    const handleNoteClick = (note) => {
+    const handleNoteClick = (note, type) => {
         setFlashCards(note.terms)
         setSummary(note.summary)
         setLesson(note.lesson)
         setSavedNote(note.content)
-        if (activeTab === 'directory') {setPathToNote(path)}
-        else {setPathToNote([...path, selectedDocument.name])}
+        if (activeTab === 'directory') {
+          setPathToNote(path)
+        } else {
+          setPathToNote([...path, selectedDocument.name])
+        }
         setNoteName(note.name)
-        setInitialValues({note: note.content, summary: note.summary, lesson: note.lesson, terms: note.terms})
-        setCurrentLocation("note-page")
-    }
+        setInitialValues({
+          note: note.content, 
+          summary: note.summary, 
+          lesson: note.lesson, 
+          terms: note.terms
+        })
+      
+        if (type === 'lesson') {
+          setCurrentLocation("lesson-page")
+        } else if (type === 'summary') {
+          setCurrentLocation("summary-page")
+        } else {
+          setCurrentLocation("note-page")
+        }
+      }
 
     const handleAddItem = () => {
-        if (componentToAdd === 'folder') {
-            addFolder()
-        } else if (componentToAdd === 'note') {
-            addNote()
-        } else if (componentToAdd === 'document') {
-            addDocument()
+        switch(componentToAdd) {
+            case 'folder':
+                addFolder();
+                break;
+            case 'document':
+                addDocument();
+                break;
+            case 'note':
+                addNote();
+                break;
+            case 'lesson':
+                addUnlinkedItem('lesson');
+                break;
+            case 'summary':
+                addUnlinkedItem('summary');
+                break;
+            case 'terms':
+                addUnlinkedItem('terms');
+                break;
+            case 'test':
+                addUnlinkedItem('test');
+                break;
+            default:
+                console.error('Unknown component type');
         }
-    }
+    };
+    
+    const addUnlinkedItem = (itemType) => {
+        setNamePopup(false);
+        setComponentToAdd("");
+        let updatedFileSystem = JSON.parse(JSON.stringify(fileSystem));
+        const newItem = {
+            name: newName,
+            type: itemType,
+            content: "",
+        };
+    
+        if (itemType === 'terms') {
+            newItem.terms = [];
+        } else if (itemType === 'test') {
+            newItem.questions = [];
+        }
+    
+        updatedFileSystem.push(newItem);
+    
+        updateDoc(docRef, {
+            profile: {
+                email: authUser.email,
+                root: updatedFileSystem
+            }
+        }).then(() => {
+            console.log("Successful Save");
+            setFileSystem(updatedFileSystem);
+        }).catch((error) => {
+            console.log(error);
+        });
+        setNewName("");
+    };
+
+    const handleUnlinkedItemClick = (item) => {
+        switch(item.type) {
+            case 'note':
+                handleNoteClick(item, 'note');
+                break;
+            case 'lesson':
+                setLesson(item.content);
+                setNoteName(item.name);
+                setPathToNote([]);
+                setInitialValues({ note: '', summary: '', lesson: item.content, terms: [] });
+                setCurrentLocation("lesson-page");
+                break;
+            case 'summary':
+                setSummary(item.content);
+                setNoteName(item.name);
+                setPathToNote([]);
+                setInitialValues({ note: '', summary: item.content, lesson: '', terms: [] });
+                setCurrentLocation("summary-page");
+                break;
+            case 'terms':
+                setFlashCards(item.terms || []);
+                setNoteName(item.name);
+                setPathToNote([]);
+                setInitialValues({ note: '', summary: '', lesson: '', terms: item.terms || [] });
+                setCurrentLocation("terms-page");
+                break;
+            case 'test':
+                setNoteName(item.name);
+                setPathToNote([]);
+                setInitialValues({ note: '', summary: '', lesson: '', terms: [], test: item.questions || [] });
+                setCurrentLocation("multiple-choice-page");
+                break;
+            default:
+                console.error('Unknown item type');
+        }
+    };
 
     const addFolder = () => {
         setNamePopup(false)
@@ -302,8 +404,8 @@ const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem,
         <div className="menu-container">
             <nav className="side-nav">
                 <div className="add-container"
-                     onMouseEnter={() => setShowOptions(true)}
-                     onMouseLeave={() => setShowOptions(false)}>
+                    onMouseEnter={() => setShowOptions(true)}
+                    onMouseLeave={() => setShowOptions(false)}>
                     <button className="add-button">
                         + ADD
                     </button>
@@ -311,7 +413,11 @@ const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem,
                         <div className="add-options">
                             <button onClick={() => setComponentToAdd("folder")}>Add Folder</button>
                             <button onClick={() => setComponentToAdd("document")}>Add Document</button>
-                            <button onClick={() => setComponentToAdd("unlinked note")}>Add Unlinked Note</button>
+                            <button onClick={() => setComponentToAdd("note")}>Add Note</button>
+                            <button onClick={() => setComponentToAdd("lesson")}>Add Lesson</button>
+                            <button onClick={() => setComponentToAdd("summary")}>Add Summary</button>
+                            <button onClick={() => setComponentToAdd("terms")}>Add Terms</button>
+                            <button onClick={() => setComponentToAdd("test")}>Add Test</button>
                         </div>
                     )}
                 </div>
@@ -362,10 +468,21 @@ const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem,
                         className={`tab ${activeTab === 'document-notes' ? 'active' : ''}`}
                         onClick={() => handleTabSwitch('document-notes')}
                     >
-                        {selectedDocument ? selectedDocument.name : 'Document Notes'}
+                        Document Notes
+                    </div>
+                    <div 
+                        className={`tab ${activeTab === 'lessons-summaries' ? 'active' : ''}`}
+                        onClick={() => handleTabSwitch('lessons-summaries')}
+                    >
+                        Lessons and Summaries
+                    </div>
+                    <div 
+                        className={`tab ${activeTab === 'terms-tests' ? 'active' : ''}`}
+                        onClick={() => handleTabSwitch('terms-tests')}
+                    >
+                        Terms and Tests
                     </div>
                 </div>
-                
                 <div className="tab-content">
                     {activeTab === 'directory' && (
                         <div className="directory-container">
@@ -380,24 +497,57 @@ const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem,
                                 ))}
                             </div>
                             <div className="notes-container">
-                                <h2 className="section-header">Unlinked Notes</h2>
-                                <div className="note-cards-container">
-                                    {currentItems.filter(item => item.type === 'note').map((item, index) => (
-                                        <div key={index} className="note-card" onClick={() => handleNoteClick(item)}>
-                                            <div className="note-preview-container">
-                                                <div 
-                                                    className="note-preview-content" 
-                                                    dangerouslySetInnerHTML={{ __html: item.content }} 
-                                                />
+                                <h2 className="section-header">Unlinked Items</h2>
+                                <div className="unlinked-items-container">
+                                    {currentItems.filter(item => 
+                                        item.type === 'note' || 
+                                        item.type === 'lesson' || 
+                                        item.type === 'summary' || 
+                                        item.type === 'terms' || 
+                                        item.type === 'test'
+                                    ).map((item, index) => (
+                                        <div key={index} className="unlinked-item-card" onClick={() => handleUnlinkedItemClick(item)}>
+                                            <div className="unlinked-item-preview-container">
+                                                <div className="unlinked-item-preview-content">
+                                                    {item.type === 'note' && (
+                                                        <div dangerouslySetInnerHTML={{ __html: item.content }} />
+                                                    )}
+                                                    {item.type === 'lesson' && (
+                                                        <div dangerouslySetInnerHTML={{ __html: item.lesson }} />
+                                                    )}
+                                                    {item.type === 'summary' && (
+                                                        <div dangerouslySetInnerHTML={{ __html: item.summary }} />
+                                                    )}
+                                                    {item.type === 'terms' && (
+                                                        <ul>
+                                                            {item.terms.slice(0, 3).map((term, termIndex) => (
+                                                                <li key={termIndex}>{term.term}: {term.definition}</li>
+                                                            ))}
+                                                            {item.terms.length > 3 && <li>...</li>}
+                                                        </ul>
+                                                    )}
+                                                    {item.type === 'test' && (
+                                                        <ul>
+                                                            {item.test.slice(0, 3).map((question, questionIndex) => (
+                                                                <li key={questionIndex}>{question}</li>
+                                                            ))}
+                                                            {item.test.length > 3 && <li>...</li>}
+                                                        </ul>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <div className="note-name">{item.name}</div>
+                                            <div className="unlinked-item-info-container">
+                                                <div className="unlinked-item-name">{item.name}</div>
+                                                <div className="unlinked-item-stats">
+                                                    <div className="unlinked-item-type">{item.type}</div>
+                                                </div>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
                         </div>
                     )}
-                    
                     {activeTab === 'document-notes' && selectedDocument && (
                         <div className="document-notes-container">
                             <div className="document-notes-header">
@@ -408,7 +558,7 @@ const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem,
                             </div>
                             <div className="document-note-cards-container">
                                 {selectedDocument.notes.map((note, index) => (
-                                    <div key={index} className="document-note-card" onClick={() => handleNoteClick(note)}>
+                                    <div key={index} className="document-note-card" onClick={() => handleNoteClick(note, 'note')}>
                                         <div className="document-note-preview-container">
                                             <div 
                                                 className="document-note-preview-content" 
@@ -418,6 +568,88 @@ const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem,
                                         <div className="note-name">{note.name}</div>
                                     </div>
                                 ))}
+                            </div>
+                        </div>
+                    )}
+                    {activeTab === 'lessons-summaries' && selectedDocument && (
+                        <div className="document-notes-container split-view">
+                            <h2>{selectedDocument.name}</h2>
+                            <div className="split-content">
+                                <div className="top-half">
+                                    <h3>Lessons</h3>
+                                    <div className="document-note-cards-container">
+                                        {selectedDocument.notes.map((note, index) => (
+                                            <div key={index} className="document-note-card" onClick={() => handleNoteClick(note, 'lesson')}>
+                                                <div className="document-note-preview-container">
+                                                    <div className="document-note-preview-content">
+                                                        <div dangerouslySetInnerHTML={{ __html: note.lesson }} />
+                                                    </div>
+                                                </div>
+                                                <div className="note-name">{note.name} - Lesson</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="bottom-half">
+                                    <h3>Summaries</h3>
+                                    <div className="document-note-cards-container">
+                                        {selectedDocument.notes.map((note, index) => (
+                                            <div key={index} className="document-note-card" onClick={() => handleNoteClick(note, 'summary')}>
+                                                <div className="document-note-preview-container">
+                                                    <div className="document-note-preview-content">
+                                                        <div dangerouslySetInnerHTML={{ __html: note.summary }} />
+                                                    </div>
+                                                </div>
+                                                <div className="note-name">{note.name} - Summary</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    {activeTab === 'terms-tests' && selectedDocument && (
+                        <div className="document-notes-container split-view">
+                            <h2>{selectedDocument.name}</h2>
+                            <div className="split-content">
+                                <div className="top-half">
+                                    <h3>Terms</h3>
+                                    <div className="document-note-cards-container">
+                                        {selectedDocument.notes.map((note, index) => (
+                                            <div key={index} className="document-note-card" onClick={() => handleNoteClick(note)}>
+                                                <div className="document-note-preview-container">
+                                                    <div className="document-note-preview-content">
+                                                        <ul>
+                                                            {note.terms.map((term, termIndex) => (
+                                                                <li key={termIndex}>{term.term}: {term.definition}</li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                <div className="note-name">{note.name} - Terms</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="bottom-half">
+                                    <h3>Tests</h3>
+                                    <div className="document-note-cards-container">
+                                        {selectedDocument.notes.map((note, index) => (
+                                            <div key={index} className="document-note-card" onClick={() => handleNoteClick(note)}>
+                                                <div className="document-note-preview-container">
+                                                    <div className="document-note-preview-content">
+                                                        <ul>
+                                                            {note.test.map((question, questionIndex) => (
+                                                                <li key={questionIndex}>{question}</li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                <div className="note-name">{note.name} - Test</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}

@@ -33,11 +33,21 @@ const Dashboard = ({ authUser }) => {
   const docRef = doc(db, "users", authUser.uid)
 
   const updateNote = () => {
-    console.log(pathToNote);
+    console.log("Updating item:", { noteName, currentLocation, pathToNote });
     let updatedFileSystem = JSON.parse(JSON.stringify(fileSystem)); // Deep copy
-    const newNote = {
+    
+    const getItemType = () => {
+        switch (currentLocation) {
+            case 'lesson-page': return 'lesson';
+            case 'summary-page': return 'summary';
+            case 'flash-cards-page': return 'terms';
+            default: return 'note';
+        }
+    };
+
+    const newItem = {
         name: noteName,
-        type: "note",
+        type: getItemType(),
         content: savedNote,
         summary: summary,
         lesson: lesson,
@@ -45,45 +55,43 @@ const Dashboard = ({ authUser }) => {
         test: []
     };
 
+    console.log("New item to save:", newItem);
+
+    const updateItemInArray = (items) => {
+        const index = items.findIndex(item => item.name === noteName && item.type === newItem.type);
+        if (index !== -1) {
+            items[index] = newItem;
+        } else {
+            items.push(newItem);
+        }
+        return items;
+    };
+
     if (pathToNote && pathToNote.length > 0) {
-        // Function to recursively traverse the file system
-        const updateNoteAtPath = (items, pathIndex) => {
+        const updateItemAtPath = (items, pathIndex) => {
             if (pathIndex === pathToNote.length) {
-                // Find the index of the existing note with the same name
-                const noteIndex = items.findIndex(item => item.name === noteName && item.type === "note");
-                if (noteIndex !== -1) {
-                    // Replace the existing note
-                    items[noteIndex] = newNote;
-                } else {
-                    console.error("Note does not exist");
-                }
-                return items;
+                return updateItemInArray(items);
             }
 
             const folder = items.find(item => item.name === pathToNote[pathIndex] && item.type === "folder");
             const document = items.find(item => item.name === pathToNote[pathIndex] && item.type === "document");
 
             if (folder) {
-                folder.content = updateNoteAtPath(folder.content, pathIndex + 1);
+                folder.content = updateItemAtPath(folder.content, pathIndex + 1);
             } else if (document) {
-                document.notes = updateNoteAtPath(document.notes, pathIndex + 1);
+                document.notes = updateItemAtPath(document.notes, pathIndex + 1);
             } else {
-                console.error("Path not found or invalid structure:", pathToNote.slice(0, pathIndex + 1));
+                console.error("Path not found:", pathToNote.slice(0, pathIndex + 1));
             }
             return items;
         };
 
-        updatedFileSystem = updateNoteAtPath(updatedFileSystem, 0);
+        updatedFileSystem = updateItemAtPath(updatedFileSystem, 0);
     } else {
-        // If no path, replace or add to root
-        const noteIndex = updatedFileSystem.findIndex(item => item.name === noteName && item.type === "note");
-        if (noteIndex !== -1) {
-            // Replace the existing note
-            updatedFileSystem[noteIndex] = newNote;
-        } else {
-            console.error("Note does not exist");
-        }
+        updatedFileSystem = updateItemInArray(updatedFileSystem);
     }
+
+    console.log("Updated file system:", updatedFileSystem);
 
     updateDoc(docRef, {
         profile: {
@@ -94,11 +102,11 @@ const Dashboard = ({ authUser }) => {
         console.log("Successful Save");
         setFileSystem(updatedFileSystem);
     }).catch((error) => {
-        console.log("Error updating document:", error);
+        console.error("Error updating document:", error);
     });
 
     setInitialValues(currentValues);
-  };
+};
 
   const readData = async () => {
     try {
