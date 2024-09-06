@@ -59,8 +59,6 @@
     background-color: #f9f9f9;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     display: flex;
-    flex-direction: row;
-    align-items: stretch;
     justify-content: space-between;
     cursor: pointer;
     transition: box-shadow 0.3s ease;
@@ -130,7 +128,8 @@
 
 .notes-container {
     width: 45vw;
-    height: 49vh;
+    height: 42vh;
+    overflow-y: scroll;
 }
 
 .add-container {
@@ -324,7 +323,7 @@
 }
 
 .folders-container{
-    height: 49vh;
+    height: 42vh;
     border-bottom: 1px solid #000;
     margin-bottom: 2vh;
     overflow-y: scroll;
@@ -599,4 +598,56 @@
 
 .top-half {
     border-bottom: 1px solid #ccc;
+}
+
+.delete-icon {
+    height: 22px;
+    width: 22px;
+}
+
+.document-delete-button, 
+.delete-folder-button,
+.unlinked-item-delete-button,
+.document-note-delete {
+    padding: 3px;
+    padding-right: 25px;
+    height: 25px;
+    width: 25px;
+    box-shadow: 0 0px 0px rgba(0, 0, 0, 0.1);
+    background-color: transparent;
+}
+
+.document-delete-button:hover, 
+.delete-folder-button:hover,
+.unlinked-item-delete-button:hover,
+.document-note-delete:hover {
+    background-color: transparent;
+}
+
+.document-delete-button {
+    margin-top: 10px;
+    margin-right: 10px;
+}
+
+.delete-folder-button {
+    margin: auto;
+    margin-left: 10px;
+}
+
+.flex-div-unlinked {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%
+}
+
+.unlinked-item-delete-button {
+    align-self: flex-end;
+    margin-bottom: 5px;
+    margin-right: 2px;
+}
+
+.document-note-delete {
+    margin-bottom: 5px;
+    margin-right: 5px;
 }

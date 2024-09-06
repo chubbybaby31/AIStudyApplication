@@ -241,15 +241,26 @@ app.post('/extract-notes', async (req, res) => {
     });
 
 app.post('/generate-flash-cards', async (req, res) => {
-    const { note, summary, lesson, terms } = req.body;
+    const { note, summary, lesson, terms, topic } = req.body;
     try {
-        const prompt = `Create a list of exactly ${terms} flash cards. These flash cards should be based off of these notes: ${note}, this summary: ${summary}, and/or this lesson: ${lesson}.
+        let prompt = ""
+        if (note) {
+            prompt = `Create a list of exactly ${terms} flash cards. These flash cards should be based off of these notes: ${note}, this summary: ${summary}, and/or this lesson: ${lesson}.
         You may not receive all of them (you may not recieve the notes, the summary, and the lesson). Each flash card should have a term and definition. If it is
         a flash card about a concept, the term will be the name of the concept while the definition will be what the concept is. If the flash card is for vocabulary, the term should be the word
         and the definition will be the word's definition. All flash cards should be formatted like a JSON like this: {"term": "Sample term", definition: "sample definition"}. Your final reponse
         should be a list of these flashcards that is of length $${terms}. DO NOT ADD ANY ADDITIONAL FORMATTING other than what I have specified here. For example, do not add "JSON response:" or anything like that.
         Also ensure that the number of terms (the length of the list in the response) is no greater and no less than ${terms}. Remember you are providing a service and you must be exact therefore it should be exactly ${terms} long.
         Also if you are providing vocabular, make sure it is relevant to the topic and not just a word you found in the notes, summary, and/or lesson`;
+        } else if (!note && topic) {
+            prompt = `Create a list of exactly ${terms} flash cards. These flash cards should be based off of this topic: ${topic}. Each flash card should have a term and definition. If it is
+        a flash card about a concept, the term will be the name of the concept while the definition will be what the concept is. If the flash card is for vocabulary, the term should be the word
+        and the definition will be the word's definition. All flash cards should be formatted like a JSON like this: {"term": "Sample term", definition: "sample definition"}. Your final reponse
+        should be a list of these flashcards that is of length $${terms}. DO NOT ADD ANY ADDITIONAL FORMATTING other than what I have specified here. For example, do not add "JSON response:" or anything like that.
+        Also ensure that the number of terms (the length of the list in the response) is no greater and no less than ${terms}. Remember you are providing a service and you must be exact therefore it should be exactly ${terms} long.
+        Also if you are providing vocabular, make sure it is relevant to the topic.`;
+        } 
+        
 
         const result = await model.generateContent([
         { text: prompt }

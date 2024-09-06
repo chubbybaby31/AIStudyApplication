@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import './Menu.css'
+import { ReactComponent as DeleteIcon} from '../assets/icons/delete-icon.svg';
 import { getDoc, updateDoc } from "firebase/firestore";
 
 const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem, setSavedNote, setSummary, 
@@ -14,6 +15,7 @@ const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem,
     const [selectedDocument, setSelectedDocument] = useState(null);
     const [showAddNotePopup, setShowAddNotePopup] = useState(false);
     const [newNoteName, setNewNoteName] = useState(''); 
+    let del = false
 
     const handleAddNote = async () => {
         if (!newNoteName.trim() || !selectedDocument) return;
@@ -141,29 +143,33 @@ const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem,
     }, [fileSystem, path]);
 
     const handleNoteClick = (note, type) => {
-        setFlashCards(note.terms)
-        setSummary(note.summary)
-        setLesson(note.lesson)
-        setSavedNote(note.content)
-        if (activeTab === 'directory') {
-          setPathToNote(path)
-        } else {
-          setPathToNote([...path, selectedDocument.name])
-        }
-        setNoteName(note.name)
-        setInitialValues({
-          note: note.content, 
-          summary: note.summary, 
-          lesson: note.lesson, 
-          terms: note.terms
-        })
-      
-        if (type === 'lesson') {
-          setCurrentLocation("lesson-page")
-        } else if (type === 'summary') {
-          setCurrentLocation("summary-page")
-        } else {
-          setCurrentLocation("note-page")
+        if (!note) {
+            setFlashCards(note.terms)
+            setSummary(note.summary)
+            setLesson(note.lesson)
+            setSavedNote(note.content)
+            if (activeTab === 'directory') {
+            setPathToNote(path)
+            } else {
+            setPathToNote([...path, selectedDocument.name])
+            }
+            setNoteName(note.name)
+            setInitialValues({
+            note: note.content, 
+            summary: note.summary, 
+            lesson: note.lesson, 
+            terms: note.terms
+            })
+        
+            if (type === 'lesson') {
+            setCurrentLocation("lesson-page")
+            } else if (type === 'summary') {
+            setCurrentLocation("summary-page")
+            } else if (type === 'terms') {
+                setCurrentLocation('flash-cards-page')
+            } else {
+            setCurrentLocation("note-page")
+            }
         }
       }
 
@@ -233,7 +239,7 @@ const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem,
     };
 
     const handleUnlinkedItemClick = (item) => {
-        switch(item.type) {
+        if (!del) {switch(item.type) {
             case 'note':
                 handleNoteClick(item, 'note');
                 break;
@@ -256,7 +262,7 @@ const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem,
                 setNoteName(item.name);
                 setPathToNote([]);
                 setInitialValues({ note: '', summary: '', lesson: '', terms: item.terms || [] });
-                setCurrentLocation("terms-page");
+                setCurrentLocation("flash-cards-page");
                 break;
             case 'test':
                 setNoteName(item.name);
@@ -266,7 +272,7 @@ const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem,
                 break;
             default:
                 console.error('Unknown item type');
-        }
+        }}
     };
 
     const addFolder = () => {
@@ -405,6 +411,256 @@ const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem,
         setNewName("")
     };
 
+    const deleteFolder = (item) => {
+        // Ask for confirmation before deleting
+        const confirmDelete = window.confirm(`Are you sure you want to delete the folder "${item.name}" and all its contents?`);
+        if (!confirmDelete) return;
+    
+        // Create a copy of the file system
+        let updatedFileSystem = [...fileSystem];
+    
+        // Function to recursively find and remove the folder
+        const removeFolderFromPath = (items, pathIndex) => {
+            if (pathIndex === path.length) {
+                // We're at the correct level, remove the folder
+                return items.filter(i => (i.name !== item.name || i.type !== item.type));
+            }
+    
+            // Find the next folder in the path
+            const folderIndex = items.findIndex(i => i.name === path[pathIndex] && i.type === 'folder');
+            if (folderIndex === -1) {
+                console.error("Path not found");
+                return items;
+            }
+    
+            // Recursively update the content of the folder
+            const updatedFolder = {...items[folderIndex]};
+            updatedFolder.content = removeFolderFromPath(updatedFolder.content, pathIndex + 1);
+    
+            // Return the updated list of items
+            return [
+                ...items.slice(0, folderIndex),
+                updatedFolder,
+                ...items.slice(folderIndex + 1)
+            ];
+        };
+    
+        // Remove the folder from the file system
+        updatedFileSystem = removeFolderFromPath(updatedFileSystem, 0);
+    
+        // Update the state
+        setFileSystem(updatedFileSystem);
+    
+        // Update Firestore
+        updateFirestore(updatedFileSystem);
+    
+        setCurrentItems(getCurrentItems(updatedFileSystem));
+    };
+
+    const deleteDocument = (item) => {
+        // Ask for confirmation before deleting
+        const confirmDelete = window.confirm(`Are you sure you want to delete the document "${item.name}" and all its associated notes?`);
+        if (!confirmDelete) return;
+    
+        // Create a copy of the file system
+        let updatedFileSystem = [...fileSystem];
+    
+        // Function to recursively find and remove the document
+        const removeDocumentFromPath = (items, pathIndex) => {
+            if (pathIndex === path.length) {
+                return items.filter(i => (i.name !== item.name || i.type !== item.type));
+            }
+    
+            // Find the next folder in the path
+            const folderIndex = items.findIndex(i => i.name === path[pathIndex] && i.type === 'folder');
+            if (folderIndex === -1) {
+                console.error("Path not found");
+                return items;
+            }
+    
+            // Recursively update the content of the folder
+            const updatedFolder = {...items[folderIndex]};
+            updatedFolder.content = removeDocumentFromPath(updatedFolder.content, pathIndex + 1);
+    
+            // Return the updated list of items
+            return [
+                ...items.slice(0, folderIndex),
+                updatedFolder,
+                ...items.slice(folderIndex + 1)
+            ];
+        };
+    
+        // Remove the document from the file system
+        updatedFileSystem = removeDocumentFromPath(updatedFileSystem, 0);
+    
+        // Update the state
+        setFileSystem(updatedFileSystem);
+    
+        // Update Firestore
+        updateFirestore(updatedFileSystem);
+    
+        // Refresh the current items
+        setCurrentItems(getCurrentItems(updatedFileSystem));
+    
+        // If the deleted document was the selected document, clear the selection
+        if (selectedDocument && selectedDocument.name === item.name) {
+            setSelectedDocument(null);
+        }
+    };
+
+    const deleteDocumentNote = (item) => {
+        del = true
+        const confirmDelete = window.confirm(`Are you sure you want to delete this note from the document?`);
+        if (!confirmDelete) return;
+    
+        // Create a copy of the file system
+        let updatedFileSystem = [...fileSystem];
+    
+        // Function to recursively find the document and remove the note
+        const removeNoteFromDocument = (items, pathIndex) => {
+            if (pathIndex === path.length) {
+                // We're at the correct level, find the document and remove the note
+                return items.map(doc => {
+                    if (doc.name === selectedDocument.name && doc.type === 'document') {
+                        return {
+                            ...doc,
+                            notes: doc.notes.filter(note => note.name !== item.name)
+                        };
+                    }
+                    return doc;
+                });
+            }
+    
+            // Find the next folder in the path
+            const folderIndex = items.findIndex(i => i.name === path[pathIndex] && i.type === 'folder');
+            if (folderIndex === -1) {
+                console.error("Path not found");
+                return items;
+            }
+    
+            // Recursively update the content of the folder
+            const updatedFolder = {...items[folderIndex]};
+            updatedFolder.content = removeNoteFromDocument(updatedFolder.content, pathIndex + 1);
+    
+            // Return the updated list of items
+            return [
+                ...items.slice(0, folderIndex),
+                updatedFolder,
+                ...items.slice(folderIndex + 1)
+            ];
+        };
+    
+        // Remove the note from the document in the file system
+        updatedFileSystem = removeNoteFromDocument(updatedFileSystem, 0);
+    
+        // Update the state
+        setFileSystem(updatedFileSystem);
+    
+        // Update Firestore
+        updateFirestore(updatedFileSystem);
+    
+        // Update the selectedDocument state
+        if (selectedDocument) {
+            const updatedSelectedDocument = {
+                ...selectedDocument,
+                notes: selectedDocument.notes.filter(note => note !== item)
+            };
+            setSelectedDocument(updatedSelectedDocument);
+        }
+    
+        // Clear any displayed or edited content related to the deleted note
+        if (item.type === 'note') setSavedNote('');
+        if (item.type === 'lesson') setLesson('');
+        if (item.type === 'summary') setSummary('');
+        if (item.type === 'terms') setFlashCards([]);
+    
+        // Refresh the current items if necessary
+        del = false
+        setCurrentItems(getCurrentItems(updatedFileSystem));
+    };
+
+    const deleteUnlinked = (item) => {
+        // Ask for confirmation before deleting
+        del = true
+        const confirmDelete = window.confirm(`Are you sure you want to delete this unlinked ${item.type}?`);
+        if (!confirmDelete) return;
+    
+        // Create a copy of the file system
+        let updatedFileSystem = [...fileSystem];
+    
+        // Remove the unlinked item from the root level
+        updatedFileSystem = updatedFileSystem.filter(i => (i.name !== item.name || i.type !== item.type));
+    
+        // Update the state
+        setFileSystem(updatedFileSystem);
+    
+        // Update Firestore
+        updateFirestore(updatedFileSystem);
+    
+        // Refresh the current items
+        setCurrentItems(updatedFileSystem);
+    
+        // If we're in a specific tab, we might need to update the view
+        switch (activeTab) {
+            case 'document-notes':
+                if (item.type === 'note') {
+                    // Remove the item from the selectedDocument if it exists there
+                    if (selectedDocument) {
+                        const updatedNotes = selectedDocument.notes.filter(note => note !== item);
+                        setSelectedDocument({...selectedDocument, notes: updatedNotes});
+                    }
+                }
+                break;
+            case 'lessons-summaries':
+                if (item.type === 'lesson' || item.type === 'summary') {
+                    // Similar logic as above, if needed
+                }
+                break;
+            case 'terms-tests':
+                if (item.type === 'terms' || item.type === 'test') {
+                    // Similar logic as above, if needed
+                }
+                break;
+            default:
+                break;
+        }
+    
+        // If the deleted item was being displayed or edited, clear it
+        if (item.type === 'note') setSavedNote('');
+        if (item.type === 'lesson') setLesson('');
+        if (item.type === 'summary') setSummary('');
+        if (item.type === 'terms') setFlashCards([]);
+        del = false
+    };
+
+    const updateFirestore = async (updatedFileSystem) => {
+        try {
+            await updateDoc(docRef, {
+                profile: {
+                    email: authUser.email,
+                    root: updatedFileSystem
+                }
+            });
+            console.log("File system updated in Firestore");
+        } catch (error) {
+            console.error("Error updating Firestore:", error);
+        }
+    };
+
+    const getCurrentItems = (fileSystem) => {
+        let currentLevel = fileSystem;
+        for (let folderName of path) {
+            const folder = currentLevel.find(item => item.name === folderName && item.type === 'folder');
+            if (folder) {
+                currentLevel = folder.content;
+            } else {
+                console.error("Path not found");
+                return [];
+            }
+        }
+        return currentLevel;
+    };
+
     return (
         <div className="menu-container">
             <nav className="side-nav">
@@ -456,6 +712,9 @@ const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem,
                                         <div>Tests: {testCount}</div>
                                     </div>
                                 </div>
+                                <button className="document-delete-button" onClick={() => deleteDocument(item)}>
+                                    < DeleteIcon className="delete-icon" />
+                                </button>
                             </div>
                         );
                     })}
@@ -497,6 +756,9 @@ const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem,
                                     <div className="component" key={index}>
                                         <button className="main-component" onClick={() => setPath([...path, item.name])}>
                                             <div className="component-name">{item.name}</div>
+                                        </button>
+                                        <button className="delete-folder-button" onClick={() => deleteFolder(item)}>
+                                            <DeleteIcon className="delete-icon" />
                                         </button>
                                     </div>
                                 ))}
@@ -541,11 +803,16 @@ const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem,
                                                     )}
                                                 </div>
                                             </div>
-                                            <div className="unlinked-item-info-container">
-                                                <div className="unlinked-item-name">{item.name}</div>
-                                                <div className="unlinked-item-stats">
-                                                    <div className="unlinked-item-type">{item.type}</div>
+                                            <div className="flex-div-unlinked">
+                                                <div className="unlinked-item-info-container">
+                                                    <div className="unlinked-item-name">{item.name}</div>
+                                                    <div className="unlinked-item-stats">
+                                                        <div className="unlinked-item-type">{item.type}</div>
+                                                    </div>
                                                 </div>
+                                                <button className="unlinked-item-delete-button" onClick={() => deleteUnlinked(item)}>
+                                                        <DeleteIcon className="delete-icon" />
+                                                </button>
                                             </div>
                                         </div>
                                     ))}
@@ -570,7 +837,12 @@ const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem,
                                                 dangerouslySetInnerHTML={{ __html: note.content }} 
                                             />
                                         </div>
-                                        <div className="note-name">{note.name}</div>
+                                        <div className="flex-div-unlinked">
+                                            <div className="note-name">{note.name}</div>
+                                            <button className="document-note-delete" onClick={() => deleteDocumentNote(note)}>
+                                                <DeleteIcon className="delete-icon" />
+                                            </button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -621,7 +893,7 @@ const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem,
                                     <h3>Terms</h3>
                                     <div className="document-note-cards-container">
                                         {selectedDocument.notes.map((note, index) => (
-                                            <div key={index} className="document-note-card" onClick={() => handleNoteClick(note)}>
+                                            <div key={index} className="document-note-card" onClick={() => handleNoteClick(note, 'terms')}>
                                                 <div className="document-note-preview-container">
                                                     <div className="document-note-preview-content">
                                                         <ul>
@@ -640,7 +912,7 @@ const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem,
                                     <h3>Tests</h3>
                                     <div className="document-note-cards-container">
                                         {selectedDocument.notes.map((note, index) => (
-                                            <div key={index} className="document-note-card" onClick={() => handleNoteClick(note)}>
+                                            <div key={index} className="document-note-card" onClick={() => handleNoteClick(note, 'test')}>
                                                 <div className="document-note-preview-container">
                                                     <div className="document-note-preview-content">
                                                         <ul>

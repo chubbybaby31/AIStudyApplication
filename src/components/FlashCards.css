@@ -82,7 +82,7 @@
     padding: 20px;
     border-radius: 8px;
     width: 35vw;
-    height: calc(20vh - 20px);
+    height: calc(28vh - 20px);
     margin: auto;
     z-index: 1;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -159,7 +159,7 @@
     background: repeating-conic-gradient(from -30deg,#ff6a6a 0 60deg,#ffcd93 0 120deg,#ff8383 0 180deg); 
     animation: l13 1.5s infinite alternate;
     position: absolute;
-    top: 59vh;
+    top: 66vh;
     left: 41vw;
     z-index: 2;
 }
@@ -173,4 +173,154 @@
     76%  {clip-path: polygon(50% 50%,25% 0   ,25% 0   ,0   50% ,25% 100%,75% 100%,100% 50%,75%  0  )}
     95%,
     100% {clip-path: polygon(50% 50%,75% 0   ,25% 0   ,0   50% ,25% 100%,75% 100%,100% 50%,75%  0  )}
+}
+
+/* Add these new styles to your existing FlashCards.css */
+
+.flash-card-tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.tab-button {
+  padding: 10px 20px;
+  margin: 0 10px;
+  border: none;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.tab-button.active {
+  background-color: #ffcd93;
+}
+
+.terms-edit-container {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 35vw;
+  height: 60vh;
+  margin: auto;
+  z-index: 1;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+}
+
+.term-edit-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.term-input {
+  flex: 1;
+  padding: 5px;
+  margin-right: 10px;
+}
+
+.term-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.definition-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  min-height: 80px;
+  resize: vertical;
+}
+
+
+.delete-term-button {
+  align-self: flex-end;
+  padding: 4px 8px;
+  background-color: #ff8383;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: 0.3s;
+}
+
+.delete-term-button:hover {
+  background-color: #ff8383;
+}
+
+.add-term-button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-top: 20px;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+/* Adjust existing styles as needed */
+.flash-card-container {
+  /* ... existing styles ... */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.generate-flash-card-container {
+  /* ... existing styles ... */
+  margin-top: 20px;
+}
+
+.terms-edit-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.terms-edit-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.terms-edit-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.terms-edit-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Add these styles to your FlashCards.css */
+
+.generate-flash-card-container {
+  /* ... existing styles ... */
+  display: flex;
+  flex-direction: column;
+}
+
+.generate-flash-card-label {
+  /* ... existing styles ... */
+  margin-top: 10px;
+}
+
+.generate-flash-card-input {
+  /* ... existing styles ... */
+  margin-bottom: 10px;
+}
+
+.generate-flash-card-button {
+  /* ... existing styles ... */
+  margin-top: 10px;
 }

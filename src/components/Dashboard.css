@@ -114,3 +114,12 @@
     box-shadow: 0 0px 0px rgba(0, 0, 0, 0.2);
     cursor: auto;
   }
+
+  .main-back-button {
+    position: absolute;
+    bottom: 1vh;
+    right: 8vh;
+    cursor: pointer;
+  }
+
+  

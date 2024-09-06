@@ -271,10 +271,13 @@ const Dashboard = ({ authUser }) => {
         />}
       </div>
       {currentLocation !== 'menu-page' &&
-      <button 
-        className="main-save-button" 
-        disabled={initialValues.note === currentValues.note && initialValues.summary === currentValues.summary && initialValues.lesson === currentValues.lesson && initialValues.terms === currentValues.terms} 
-        onClick={updateNote}>Save</button>
+      <div className="directory-buttons">
+        <button 
+          className="main-save-button" 
+          disabled={initialValues.note === currentValues.note && initialValues.summary === currentValues.summary && initialValues.lesson === currentValues.lesson && initialValues.terms === currentValues.terms} 
+          onClick={updateNote}>Save</button>
+        <button className="main-back-button" onClick={() => setCurrentLocation("menu-page")}>Back</button>
+      </div>
       }
     </div>
   )
