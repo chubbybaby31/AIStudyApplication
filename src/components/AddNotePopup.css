@@ -1,0 +1,42 @@
+/* AddNotePopup.css */
+.add-note-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.427);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    border-radius: 0;
+}
+
+.add-note-popup-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    width: 300px;
+}
+
+.add-note-popup-content h2 {
+    margin-top: 0;
+}
+
+.add-note-popup-content form {
+    display: flex;
+    flex-direction: column;
+}
+
+.add-note-popup-content input,
+.add-note-popup-content select {
+    margin-bottom: 10px;
+    padding: 5px;
+}
+
+.add-note-popup-buttons {
+    display: flex;
+    justify-content: space-between;
+}

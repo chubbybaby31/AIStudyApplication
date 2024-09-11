@@ -122,4 +122,10 @@
     cursor: pointer;
   }
 
+  .move-button {
+    position: absolute;
+    bottom: 1vh;
+    right: 15vh;
+  }
+
   

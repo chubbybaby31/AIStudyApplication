@@ -9,6 +9,7 @@ import Summary from './Summary'
 import Lesson from './Lesson'
 import FlashCards from './FlashCards'
 import Menu from './Menu';
+import MoveNotePopup from './MoveNotePopup';
 
 const Dashboard = ({ authUser }) => {
   const [pdfFile, setPdfFile] = useState(null);
@@ -23,31 +24,104 @@ const Dashboard = ({ authUser }) => {
   const [currentFlashCard, setCurrentFlashCard] = useState({'term': 'Generate flash cards to see them here...', 'definition': 'Generate flash cards to see them here...'})
   const [lookingAtTerm, setLookingAtTerm] = useState(true)
   const [messageToChat, setMessageToChat] = useState("")
+  const [showMoveNotePopup, setShowMoveNotePopup] = useState(false);
+  const [noteToMove, setNoteToMove] = useState(null);
+  const [path, setPath] = useState([])
 
   const [fileSystem, setFileSystem] = useState("")
   const [pathToNote, setPathToNote] = useState("")
   const [noteName, setNoteName] = useState("")
   const [initialValues, setInitialValues] = useState({note: "", summary: "", lesson: "", terms: []})
   const [currentValues, setCurrentValues] = useState({note: "", summary: "", lesson: "", terms: []})
+  const [type, setType] = useState("")
 
   const docRef = doc(db, "users", authUser.uid)
+
+  const handleMoveNote = (note, destinationPath) => {
+    let updatedFileSystem = JSON.parse(JSON.stringify(fileSystem)); // Deep copy
+    let noteRemoved = false;
+  
+    // Recursive function to remove the note from its current location
+    const removeNote = (items) => {
+      return items.map(item => {
+        if (item.type === 'document' && item.notes) {
+          const noteIndex = item.notes.findIndex(n => n.name === note.name && n.type === note.type);
+          if (noteIndex !== -1) {
+            noteRemoved = true;
+            return {
+              ...item,
+              notes: item.notes.filter((_, index) => index !== noteIndex)
+            };
+          }
+        } else if (item.type === 'folder') {
+          return {
+            ...item,
+            content: removeNote(item.content)
+          };
+        }
+        return item;
+      }).filter(item => {
+        if (item.type !== 'folder' && item.type !== 'document') {
+          return item.name !== note.name || item.type !== note.type;
+        }
+        return true;
+      });
+    };
+  
+    updatedFileSystem = removeNote(updatedFileSystem);
+  
+    // If the note wasn't removed from a nested location, remove it from the root
+    if (!noteRemoved) {
+      updatedFileSystem = updatedFileSystem.filter(item => item.name !== note.name || item.type !== note.type);
+    }
+  
+    // Add the note to the new location
+    const addNote = (items, pathIndex = 0) => {
+      if (pathIndex === destinationPath.length) {
+        // We've reached the destination, add the note here
+        return [...items, note];
+      }
+  
+      return items.map(item => {
+        if (item.name === destinationPath[pathIndex]) {
+          if (item.type === 'folder') {
+            return {
+              ...item,
+              content: addNote(item.content, pathIndex + 1)
+            };
+          } else if (item.type === 'document') {
+            return {
+              ...item,
+              notes: [...(item.notes || []), note]
+            };
+          }
+        }
+        return item;
+      });
+    };
+  
+    updatedFileSystem = destinationPath.length === 0 ? [...updatedFileSystem, note] : addNote(updatedFileSystem);
+  
+    setFileSystem(updatedFileSystem);
+    updateDoc(docRef, {
+      profile: {
+        email: authUser.email,
+        root: updatedFileSystem
+      }
+    }).then(() => {
+      console.log("Note moved successfully");
+    }).catch((error) => {
+      console.error("Error moving note:", error);
+    });
+  };
 
   const updateNote = () => {
     console.log("Updating item:", { noteName, currentLocation, pathToNote });
     let updatedFileSystem = JSON.parse(JSON.stringify(fileSystem)); // Deep copy
-    
-    const getItemType = () => {
-        switch (currentLocation) {
-            case 'lesson-page': return 'lesson';
-            case 'summary-page': return 'summary';
-            case 'flash-cards-page': return 'terms';
-            default: return 'note';
-        }
-    };
 
     const newItem = {
         name: noteName,
-        type: getItemType(),
+        type: type,
         content: savedNote,
         summary: summary,
         lesson: lesson,
@@ -106,7 +180,7 @@ const Dashboard = ({ authUser }) => {
     });
 
     setInitialValues(currentValues);
-};
+  };
 
   const readData = async () => {
     try {
@@ -257,6 +331,9 @@ const Dashboard = ({ authUser }) => {
           setNoteName={setNoteName}
           setPathToNote={setPathToNote}
           setInitialValues={setInitialValues}
+          setType={setType}
+          path={path}
+          setPath={setPath}
         />}
         {(currentLocation !== 'note-page' && currentLocation !== 'menu-page') && <Chatbot 
           note={savedNote} 
@@ -277,10 +354,30 @@ const Dashboard = ({ authUser }) => {
           disabled={initialValues.note === currentValues.note && initialValues.summary === currentValues.summary && initialValues.lesson === currentValues.lesson && initialValues.terms === currentValues.terms} 
           onClick={updateNote}>Save</button>
         <button className="main-back-button" onClick={() => setCurrentLocation("menu-page")}>Back</button>
+        {type === "note" && <button className="move-button" onClick={() => {
+          setNoteToMove({
+            name: noteName,
+            type: "note",
+            content: savedNote,
+            summary: summary,
+            lesson: lesson,
+            terms: flashCards,
+            test: []
+          });
+          setShowMoveNotePopup(true);
+        }}>Move</button>}
+        {showMoveNotePopup && (
+          <MoveNotePopup
+            onClose={() => setShowMoveNotePopup(false)}
+            onMove={handleMoveNote}
+            fileSystem={fileSystem}
+            currentNote={noteToMove}
+          />
+        )}
       </div>
       }
     </div>
   )
-}
+} 
 
 export default Dashboard

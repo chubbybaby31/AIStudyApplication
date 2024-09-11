@@ -496,6 +496,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 1.5vw;
+    margin-left: 20px;
 }
 
 .unlinked-item-card {
@@ -650,4 +651,50 @@
 .document-note-delete {
     margin-bottom: 5px;
     margin-right: 5px;
+}
+
+.root-container {
+    width: 100%;
+    height: 100%;
+}
+
+.root-folders-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.root-folder {
+    display: flex;
+    justify-content: space-between;
+    margin-inline: 20px;
+    margin-bottom: 20px;
+}
+
+.root-folder-main-component {
+    background-color: #dedede;
+    width: 100%;
+    margin-right: 20px;
+    text-align: left;
+    font-size: 18px;
+    padding: 10px;
+}
+
+.root-folder-main-component:hover {
+    background-color: #dedede;
+}
+
+.root-delete-folder-button {
+    background-color: transparent;
+    box-shadow: 0 0px 0px rgba(0, 0, 0, 0.1);
+    padding: 0;
+
+}
+
+.root-delete-folder-button:hover {
+    background-color: transparent;
+    box-shadow: 0 0px 0px rgba(0, 0, 0, 0.1);
+}
+
+.section-header.root {
+    margin: 20px;
 }
