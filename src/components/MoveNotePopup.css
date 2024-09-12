@@ -121,3 +121,20 @@
     background-color: #ccc;
     cursor: not-allowed;
 }
+
+.move-type-selector {
+    margin-bottom: 16px;
+}
+
+.move-type-selector label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.move-type-selector select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    background-color: white;
+}

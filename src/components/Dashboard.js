@@ -115,6 +115,99 @@ const Dashboard = ({ authUser }) => {
     });
   };
 
+  const handleMoveItem = (item, destinationPath, itemTypeToMove) => {
+    let updatedFileSystem = JSON.parse(JSON.stringify(fileSystem)); // Deep copy
+    let itemRemoved = false;
+    let movedItem = null;
+
+    // Function to remove the item from its current location
+    const removeItem = (items) => {
+        return items.map(docItem => {
+            if (docItem.type === 'document' && docItem.notes) {
+                const noteIndex = docItem.notes.findIndex(n => n.name === item.name);
+                if (noteIndex !== -1) {
+                    itemRemoved = true;
+                    movedItem = {...docItem.notes[noteIndex]}; // Create a copy of the entire note
+                    return {
+                        ...docItem,
+                        notes: docItem.notes.filter((_, index) => index !== noteIndex)
+                    };
+                }
+            } else if (docItem.type === 'folder') {
+                return { ...docItem, content: removeItem(docItem.content) };
+            }
+            return docItem;
+        }).filter(docItem => {
+            if (docItem.name === item.name && docItem.type === item.type) {
+                itemRemoved = true;
+                movedItem = {...docItem}; // Create a copy of the entire item
+                return false;
+            }
+            return true;
+        });
+    };
+
+    updatedFileSystem = removeItem(updatedFileSystem);
+
+    // If we couldn't find the item to move, log an error and return
+    if (!movedItem) {
+        console.error("Could not find the item to move:", item);
+        return;
+    }
+
+    // Add the item to the new location
+    const addItem = (items, pathIndex = 0) => {
+        if (pathIndex === destinationPath.length) {
+            // We've reached the destination
+            const lastItem = items.find(i => i.name === destinationPath[pathIndex - 1]);
+            if (lastItem && lastItem.type === 'folder') {
+                // If moving to a folder, add the entire item
+                return [...items, movedItem];
+            } else if (lastItem && (lastItem.type === 'document' || lastItem.type === 'note')) {
+                // If moving to a document, add to its notes
+                lastItem.notes = lastItem.notes || [];
+                lastItem.notes.push(movedItem);
+                return items;
+            }
+            // If lastItem is undefined, we're at the root level
+            return [...items, movedItem];
+        }
+        return items.map(docItem => {
+            if (docItem.name === destinationPath[pathIndex]) {
+                if (docItem.type === 'folder') {
+                    return { ...docItem, content: addItem(docItem.content, pathIndex + 1) };
+                } else if (docItem.type === 'document') {
+                    return { ...docItem, notes: addItem(docItem.notes || [], pathIndex + 1) };
+                }
+            }
+            return docItem;
+        });
+    };
+
+    updatedFileSystem = addItem(updatedFileSystem);
+
+    // Update the Firestore document
+    updateDoc(docRef, {
+        profile: {
+            email: authUser.email,
+            root: updatedFileSystem
+        }
+    }).then(() => {
+        console.log(`${itemTypeToMove} moved successfully`);
+        setFileSystem(updatedFileSystem);
+        // Clear the moved item from its original location in the UI
+        if (itemTypeToMove === 'summary') {
+            setSummary('');
+        } else if (itemTypeToMove === 'lesson') {
+            setLesson('');
+        } else if (itemTypeToMove === 'terms') {
+            setFlashCards([]);
+        }
+    }).catch((error) => {
+        console.error(`Error moving ${itemTypeToMove}:`, error);
+    });
+  };
+
   const updateNote = () => {
     console.log("Updating item:", { noteName, currentLocation, pathToNote });
     let updatedFileSystem = JSON.parse(JSON.stringify(fileSystem)); // Deep copy
@@ -369,9 +462,16 @@ const Dashboard = ({ authUser }) => {
         {showMoveNotePopup && (
           <MoveNotePopup
             onClose={() => setShowMoveNotePopup(false)}
-            onMove={handleMoveNote}
+            onMove={handleMoveItem}
             fileSystem={fileSystem}
-            currentNote={noteToMove}
+            currentItem={{
+              name: noteName,
+              type: currentLocation.replace('-page', ''),
+              content: savedNote,
+              summary: summary,
+              lesson: lesson,
+              terms: flashCards
+            }}
           />
         )}
       </div>
