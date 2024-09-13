@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './MoveNotePopup.css';
 
 const MoveNotePopup = ({ onClose, onMove, fileSystem, currentItem }) => {
@@ -50,6 +50,8 @@ const MoveNotePopup = ({ onClose, onMove, fileSystem, currentItem }) => {
             setSelectedPath(currentPath.slice(0, -1));
         }
     };
+    
+    useEffect(() => {console.log(selectedPath);}, [selectedPath])
 
     const handleMove = () => {
         if (selectedPath) {

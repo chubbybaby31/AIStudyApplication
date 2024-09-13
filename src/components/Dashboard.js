@@ -117,74 +117,112 @@ const Dashboard = ({ authUser }) => {
 
   const handleMoveItem = (item, destinationPath, itemTypeToMove) => {
     let updatedFileSystem = JSON.parse(JSON.stringify(fileSystem)); // Deep copy
-    let itemRemoved = false;
-    let movedItem = null;
-
-    // Function to remove the item from its current location
-    const removeItem = (items) => {
-        return items.map(docItem => {
-            if (docItem.type === 'document' && docItem.notes) {
-                const noteIndex = docItem.notes.findIndex(n => n.name === item.name);
-                if (noteIndex !== -1) {
-                    itemRemoved = true;
-                    movedItem = {...docItem.notes[noteIndex]}; // Create a copy of the entire note
-                    return {
-                        ...docItem,
-                        notes: docItem.notes.filter((_, index) => index !== noteIndex)
-                    };
-                }
-            } else if (docItem.type === 'folder') {
-                return { ...docItem, content: removeItem(docItem.content) };
-            }
-            return docItem;
-        }).filter(docItem => {
-            if (docItem.name === item.name && docItem.type === item.type) {
-                itemRemoved = true;
-                movedItem = {...docItem}; // Create a copy of the entire item
-                return false;
-            }
-            return true;
-        });
-    };
-
-    updatedFileSystem = removeItem(updatedFileSystem);
-
-    // If we couldn't find the item to move, log an error and return
-    if (!movedItem) {
-        console.error("Could not find the item to move:", item);
-        return;
+    let content = null
+    let l = null
+    let s = null
+    let t = null
+    if (itemTypeToMove !== "note"){
+      content = item[itemTypeToMove]
+    } else {
+      content = item.content
+      l = item.lesson
+      s = item.summary
+      t = item.terms
     }
-
-    // Add the item to the new location
+    let itemName = item.name
+    console.log(item.name)
+    // Function to add the item to the new location
     const addItem = (items, pathIndex = 0) => {
-        if (pathIndex === destinationPath.length) {
-            // We've reached the destination
-            const lastItem = items.find(i => i.name === destinationPath[pathIndex - 1]);
-            if (lastItem && lastItem.type === 'folder') {
-                // If moving to a folder, add the entire item
-                return [...items, movedItem];
-            } else if (lastItem && (lastItem.type === 'document' || lastItem.type === 'note')) {
-                // If moving to a document, add to its notes
-                lastItem.notes = lastItem.notes || [];
-                lastItem.notes.push(movedItem);
-                return items;
-            }
-            // If lastItem is undefined, we're at the root level
-            return [...items, movedItem];
+        if (pathIndex === destinationPath.length - 1) {
+            return items.map(docItem => {
+                if (docItem.type === 'document' && docItem.name === destinationPath[pathIndex]) {
+                    const noteIndex = docItem.notes.findIndex(n => n.name === destinationPath[pathIndex]);
+                        return {
+                            ...docItem,
+                            notes: [...docItem.notes, {name: itemName, content: content, lesson: l, summary: s, terms: t, test: [], type: "note"}]
+                        }
+                } else if (docItem.type === 'note' && docItem.name === destinationPath[pathIndex]) {
+                  return {
+                    ...docItem,
+                    [itemTypeToMove]: content
+                  }
+                } else if (docItem.type === 'folder' && docItem.name === destinationPath[pathIndex] && itemTypeToMove !== "note") {
+                    const newItem = {
+                      name: itemName,
+                      type: itemTypeToMove
+                  } 
+
+                    if (itemTypeToMove === 'terms') {
+                      newItem.terms = content;
+                  } else if (itemTypeToMove === 'test') {
+                      newItem.questions = content;
+                  } else if (itemTypeToMove === 'lesson') {
+                      newItem.lesson = content
+                  } else if (itemTypeToMove === 'summary') {
+                      newItem.summary = content
+                  }
+
+                  return {
+                    ...docItem,
+                    content: [...docItem.content, newItem]
+                  }
+                } else if (docItem.type === 'folder' && docItem.name === destinationPath[pathIndex] && itemTypeToMove === "note") {
+                  const newItem = {
+                    name: itemName,
+                    type: "note",
+                    content: content,
+                    summary: s,
+                    lesson: l,
+                    terms: t,
+                    test: []
+                } 
+
+                return {
+                  ...docItem,
+                  content: [...docItem.content, newItem]
+                }
+              }
+                return docItem;
+            });
         }
         return items.map(docItem => {
             if (docItem.name === destinationPath[pathIndex]) {
                 if (docItem.type === 'folder') {
                     return { ...docItem, content: addItem(docItem.content, pathIndex + 1) };
                 } else if (docItem.type === 'document') {
-                    return { ...docItem, notes: addItem(docItem.notes || [], pathIndex + 1) };
+                    return { ...docItem, notes: addItem(docItem.notes, pathIndex + 1) };
                 }
             }
             return docItem;
         });
     };
 
-    updatedFileSystem = addItem(updatedFileSystem);
+    const deleteNote = (items) => {
+      return items.map(docItem => {
+        if (docItem.type === "document" && docItem.notes) {
+          return {
+            ...docItem,
+            notes: docItem.notes.filter(note => {return note.name !== itemName || note.content !== content})
+          }
+        } else if (docItem.type === "folder") {
+          return {...docItem, content: deleteNote(docItem.content)}
+        } else if (docItem.type === "note") {
+          if (docItem.name === itemName && docItem.content === content) {
+            return {}
+          } else {
+            return docItem
+          }
+        } else {
+          return docItem
+        }
+      })
+    }
+
+    if (itemTypeToMove === "note"){
+      updatedFileSystem = deleteNote(updatedFileSystem)
+    }
+    updatedFileSystem = addItem(updatedFileSystem)
+    console.log(updatedFileSystem)
 
     // Update the Firestore document
     updateDoc(docRef, {
