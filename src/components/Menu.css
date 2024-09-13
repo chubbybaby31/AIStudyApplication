@@ -470,25 +470,34 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    height: 10vh;
+    width: 10vw;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+    text-align: left;
+}
+
+.temp-container {
+    display: flex;
+    flex-direction: column;
     background-color: white;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    z-index: 1000;
+    width: 20vw;
 }
 
 .add-note-popup input {
-    width: 100%;
     padding: 10px;
+    width: 100%;
     margin: 10px 0;
     border: 1px solid #ccc;
     border-radius: 4px;
+    outline: none;
 }
 
 .popup-buttons {
     display: flex;
-    justify-content: flex-end;
-    gap: 10px;
+    justify-content: space-between;
     margin-top: 10px;
 }
 

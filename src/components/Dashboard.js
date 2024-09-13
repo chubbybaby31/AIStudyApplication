@@ -17,7 +17,6 @@ const Dashboard = ({ authUser }) => {
   const [currentQuestion, setCurrentQuestion] = useState("")
   const [answersSelected, setAnswersSelected] = useState([])
   const [currentLocation, setCurrentLocation] = useState('menu-page')
-  const [isPdf, setIsPdf] = useState(false)
   const [summary, setSummary] = useState('')
   const [lesson, setLesson] = useState('')
   const [flashCards, setFlashCards] = useState("")
@@ -136,7 +135,6 @@ const Dashboard = ({ authUser }) => {
         if (pathIndex === destinationPath.length - 1) {
             return items.map(docItem => {
                 if (docItem.type === 'document' && docItem.name === destinationPath[pathIndex]) {
-                    const noteIndex = docItem.notes.findIndex(n => n.name === destinationPath[pathIndex]);
                         return {
                             ...docItem,
                             notes: [...docItem.notes, {name: itemName, content: content, lesson: l, summary: s, terms: t, test: [], type: "note"}]
@@ -181,7 +179,7 @@ const Dashboard = ({ authUser }) => {
                   ...docItem,
                   content: [...docItem.content, newItem]
                 }
-              }
+                }
                 return docItem;
             });
         }
@@ -208,18 +206,52 @@ const Dashboard = ({ authUser }) => {
           return {...docItem, content: deleteNote(docItem.content)}
         } else if (docItem.type === "note") {
           if (docItem.name === itemName && docItem.content === content) {
-            return {}
+            return null
           } else {
             return docItem
           }
         } else {
           return docItem
         }
-      })
+      }).filter(item => item !== null)
+    }
+
+    const deleteItem = (items) => {
+      return items.map(docItem => {
+        if (docItem.type === "document" && docItem.notes) {
+          return {
+            ...docItem,
+            notes: deleteItem(docItem.notes)
+          }
+        } else if (docItem.type === "folder") {
+          return {...docItem, content: deleteItem(docItem.content)}
+        } else if (docItem.type === "note") {
+          if (docItem.name === itemName) {
+            return {
+              ...docItem,
+              [itemTypeToMove]: ""
+            }
+          } else {
+            return docItem
+          }
+        } else if (docItem.type === itemTypeToMove) {
+          if (docItem.name === itemName) {
+            return null
+          }
+          else {
+            return docItem
+          }
+        }
+        else {
+          return docItem
+        }
+      }).filter(item => item !== null)
     }
 
     if (itemTypeToMove === "note"){
       updatedFileSystem = deleteNote(updatedFileSystem)
+    } else {
+      updatedFileSystem = deleteItem(updatedFileSystem)
     }
     updatedFileSystem = addItem(updatedFileSystem)
     console.log(updatedFileSystem)
@@ -393,8 +425,6 @@ const Dashboard = ({ authUser }) => {
           setCurrentLocation={setCurrentLocation} 
           pdfFile={pdfFile} 
           setPdfFile={setPdfFile} 
-          setIsPdfSummary={setIsPdf}
-          setIsPdfLesson={setIsPdf}
         />}
         {currentLocation === 'lesson-page' && 
           <div className='summary-box'>
@@ -402,7 +432,6 @@ const Dashboard = ({ authUser }) => {
             <Lesson 
               pdfFile={pdfFile}
               savedNote={savedNote}
-              isPdfLesson={isPdf}
               lesson={lesson}
               setLesson={setLesson}
               setCurrentLocation={setCurrentLocation}
@@ -416,7 +445,6 @@ const Dashboard = ({ authUser }) => {
             <Summary 
               pdfFile={pdfFile} 
               savedNote={savedNote} 
-              isPdfSummary={isPdf} 
               summary={summary} 
               setSummary={setSummary} 
               setMessageToChat={setMessageToChat}

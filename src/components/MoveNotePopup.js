@@ -5,7 +5,7 @@ const MoveNotePopup = ({ onClose, onMove, fileSystem, currentItem }) => {
     const [currentPath, setCurrentPath] = useState([]);
     const [selectedPath, setSelectedPath] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [itemTypeToMove, setItemTypeToMove] = useState('note');
+    const [itemTypeToMove, setItemTypeToMove] = useState(currentItem.type === "flash-cards" ? "terms" : currentItem.type);
 
     const getCurrentItems = () => {
         let currentLevel = fileSystem;

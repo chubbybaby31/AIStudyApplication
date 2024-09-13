@@ -80,8 +80,30 @@ const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem,
         let updatedFileSystem = [...fileSystem];
 
         if (selectedLocation === 'Unlinked') {
-            // Add to root level
-            updatedFileSystem.push(newNote);
+            const addUnlinkedNote = (items, pathIndex = 0) => {
+                return items.map(item => {
+                    if (pathIndex < pathIndex.length - 1) {
+                        if (item.type === 'folder' && item.name === path[pathIndex]) {
+                            return {
+                                ...item,
+                                content: addUnlinkedItem(item.content)
+                            }
+                        } else {
+                            return item
+                        }
+                    } else {
+                        if (item.type === 'folder' && item.name === path[pathIndex]) {
+                            return {
+                                ...item,
+                                content: [...item.content, newNote]
+                            }
+                        } else {
+                            return item
+                        }
+                    }
+                })
+            }
+            updatedFileSystem = addUnlinkedNote(updatedFileSystem)
         } else {
             // Add to selected document
             const addNoteToDocument = (items) => {
@@ -272,7 +294,31 @@ const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem,
             newItem.content = ""
         }
     
-        updatedFileSystem.push(newItem);
+        const addUnlinked = (items, pathIndex = 0) => {
+            return items.map(item => {
+                if (pathIndex < pathIndex.length - 1) {
+                    if (item.type === 'folder' && item.name === path[pathIndex]) {
+                        return {
+                            ...item,
+                            content: addUnlinkedItem(item.content)
+                        }
+                    } else {
+                        return item
+                    }
+                } else {
+                    if (item.type === 'folder' && item.name === path[pathIndex]) {
+                        return {
+                            ...item,
+                            content: [...item.content, newItem]
+                        }
+                    } else {
+                        return item
+                    }
+                }
+            })
+        }
+
+        updatedFileSystem = addUnlinked(updatedFileSystem)
     
         updateDoc(docRef, {
             profile: {
@@ -1036,16 +1082,18 @@ const Menu = ({ authUser, docRef, setCurrentLocation, fileSystem, setFileSystem,
             }
             {showAddNotePopup && 
             <div className="add-note-popup">
-                <h3>Add New Note</h3>
-                <input 
-                    type="text" 
-                    value={newNoteName} 
-                    onChange={(e) => setNewNoteName(e.target.value)} 
-                    placeholder="Enter note name"
-                />
-                <div className="popup-buttons">
-                    <button onClick={handleAddNote}>Add</button>
-                    <button onClick={() => setShowAddNotePopup(false)}>Cancel</button>
+                <div className="temp-container">
+                    <h3>Add New Note</h3>
+                    <input 
+                        type="text" 
+                        value={newNoteName} 
+                        onChange={(e) => setNewNoteName(e.target.value)} 
+                        placeholder="Enter note name"
+                    />
+                    <div className="popup-buttons">
+                        <button onClick={handleAddNote}>Add</button>
+                        <button onClick={() => setShowAddNotePopup(false)}>Cancel</button>
+                    </div>
                 </div>
             </div>
             }

@@ -4,7 +4,7 @@ import axios from 'axios';
 import { ReactComponent as RefreshIcon } from '../assets/icons/refresh-icon.svg';
 import GenerateLesson from './GenerateLesson';
 
-const Lesson = ({ pdfFile, savedNote, isPdfLesson, lesson, setLesson, setCurrentLocation, setMessageToChat }) => {
+const Lesson = ({ pdfFile, savedNote, lesson, setLesson, setCurrentLocation, setMessageToChat }) => {
     const [loading, setLoading] = useState(false);
     const [popupVisible, setPopupVisible] = useState(false);
     const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });

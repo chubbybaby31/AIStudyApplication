@@ -4,29 +4,25 @@ import NoteEntry from './NoteEntry';
 import UploadNote from './UploadNote';
 import GenerateNote from './GenerateNote';
 
-const Note = ({ savedNote, setSavedNote, setCurrentLocation, pdfFile, setPdfFile, setIsPdfSummary, setIsPdfLesson }) => {
+const Note = ({ savedNote, setSavedNote, setCurrentLocation, pdfFile, setPdfFile }) => {
 
     const [loading, setLoading] = useState(false)
     const [isEditing, setIsEditing] = useState(true);
 
     const handleSummaryTB = () => {
         setCurrentLocation('summary-page')
-        setIsPdfSummary(false)
     }
 
     const handleLessonTB = () => {
         setCurrentLocation('lesson-page')
-        setIsPdfLesson(false)
     }
 
     const handleSummaryPDF = () => {
         setCurrentLocation('summary-page')
-        setIsPdfSummary(true)
     }
 
     const handleLessonPDF = () => {
         setCurrentLocation('lesson-page')
-        setIsPdfLesson(true)
     }
 
     return (
@@ -34,20 +30,8 @@ const Note = ({ savedNote, setSavedNote, setCurrentLocation, pdfFile, setPdfFile
             <nav className="navbar">
                 <h1 className='nav-heading'>Notes</h1>
                 <div className='nav-button-container'>
-                    <div className="dropdown">
-                        <button className="nav-button">Lesson</button>
-                        <div className="dropdown-content">
-                            <button onClick={() => handleLessonPDF()}>Convert PDF to Lesson</button>
-                            <button onClick={() => handleLessonTB()}>Convert Text Box to Lesson</button>
-                        </div>
-                    </div>
-                    <div className="dropdown">
-                        <button className="nav-button">Summary</button>
-                        <div className="dropdown-content">
-                            <button onClick={() => handleSummaryPDF()}>Summarize PDF</button>
-                            <button onClick={() => handleSummaryTB()}>Summarize Text Box</button>
-                        </div>
-                    </div>
+                    <button className="nav-button" onClick={() => setCurrentLocation("lesson-page")}>Lesson</button>
+                    <button className="nav-button" onClick={() => setCurrentLocation("summary-page")}>Summary</button>
                     <button className="nav-button" onClick={() => setCurrentLocation("flash-cards-page")}>Memorize with Flash Cards</button>
                     <button className="nav-button" onClick={() => setCurrentLocation("multiple-choice-page")}>Test Your Knowledge with MCQs</button>
                 </div>
