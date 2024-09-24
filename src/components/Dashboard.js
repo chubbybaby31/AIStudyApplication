@@ -10,16 +10,18 @@ import Lesson from './Lesson'
 import FlashCards from './FlashCards'
 import Menu from './Menu';
 import MoveNotePopup from './MoveNotePopup';
+import Test from './Test';
 
 const Dashboard = ({ authUser }) => {
   const [pdfFile, setPdfFile] = useState(null);
   const [savedNote, setSavedNote] = useState("")
   const [currentQuestion, setCurrentQuestion] = useState("")
   const [answersSelected, setAnswersSelected] = useState([])
-  const [currentLocation, setCurrentLocation] = useState('menu-page')
+  const [currentLocation, setCurrentLocation] = useState('test-page')
   const [summary, setSummary] = useState('')
   const [lesson, setLesson] = useState('')
   const [flashCards, setFlashCards] = useState("")
+  const [test, setTest] = useState("")
   const [currentFlashCard, setCurrentFlashCard] = useState({'term': 'Generate flash cards to see them here...', 'definition': 'Generate flash cards to see them here...'})
   const [lookingAtTerm, setLookingAtTerm] = useState(true)
   const [messageToChat, setMessageToChat] = useState("")
@@ -35,84 +37,6 @@ const Dashboard = ({ authUser }) => {
   const [type, setType] = useState("")
 
   const docRef = doc(db, "users", authUser.uid)
-
-  const handleMoveNote = (note, destinationPath) => {
-    let updatedFileSystem = JSON.parse(JSON.stringify(fileSystem)); // Deep copy
-    let noteRemoved = false;
-  
-    // Recursive function to remove the note from its current location
-    const removeNote = (items) => {
-      return items.map(item => {
-        if (item.type === 'document' && item.notes) {
-          const noteIndex = item.notes.findIndex(n => n.name === note.name && n.type === note.type);
-          if (noteIndex !== -1) {
-            noteRemoved = true;
-            return {
-              ...item,
-              notes: item.notes.filter((_, index) => index !== noteIndex)
-            };
-          }
-        } else if (item.type === 'folder') {
-          return {
-            ...item,
-            content: removeNote(item.content)
-          };
-        }
-        return item;
-      }).filter(item => {
-        if (item.type !== 'folder' && item.type !== 'document') {
-          return item.name !== note.name || item.type !== note.type;
-        }
-        return true;
-      });
-    };
-  
-    updatedFileSystem = removeNote(updatedFileSystem);
-  
-    // If the note wasn't removed from a nested location, remove it from the root
-    if (!noteRemoved) {
-      updatedFileSystem = updatedFileSystem.filter(item => item.name !== note.name || item.type !== note.type);
-    }
-  
-    // Add the note to the new location
-    const addNote = (items, pathIndex = 0) => {
-      if (pathIndex === destinationPath.length) {
-        // We've reached the destination, add the note here
-        return [...items, note];
-      }
-  
-      return items.map(item => {
-        if (item.name === destinationPath[pathIndex]) {
-          if (item.type === 'folder') {
-            return {
-              ...item,
-              content: addNote(item.content, pathIndex + 1)
-            };
-          } else if (item.type === 'document') {
-            return {
-              ...item,
-              notes: [...(item.notes || []), note]
-            };
-          }
-        }
-        return item;
-      });
-    };
-  
-    updatedFileSystem = destinationPath.length === 0 ? [...updatedFileSystem, note] : addNote(updatedFileSystem);
-  
-    setFileSystem(updatedFileSystem);
-    updateDoc(docRef, {
-      profile: {
-        email: authUser.email,
-        root: updatedFileSystem
-      }
-    }).then(() => {
-      console.log("Note moved successfully");
-    }).catch((error) => {
-      console.error("Error moving note:", error);
-    });
-  };
 
   const handleMoveItem = (item, destinationPath, itemTypeToMove) => {
     let updatedFileSystem = JSON.parse(JSON.stringify(fileSystem)); // Deep copy
@@ -418,6 +342,17 @@ const Dashboard = ({ authUser }) => {
             </div>
         </nav>
       }
+      {currentLocation === 'test-page' &&
+        <nav className="navbar">
+            <h1 className='nav-heading'>Test</h1>
+            <div className='nav-button-container'>
+              <button className="nav-button" onClick={() => setCurrentLocation("note-page")}>Back to Notes</button>
+              <button className="nav-button" onClick={() => setCurrentLocation("summary-page")}>Summary</button>
+              <button className="nav-button" onClick={() => setCurrentLocation("lesson-page")}>Lesson</button>
+              <button className="nav-button"  onClick={() => setCurrentLocation("multiple-choice-page")} >Test Your Knowledge with MCQs</button>
+            </div>
+        </nav>
+      }
       <div className={`main-body ${currentLocation === 'note-page' || currentLocation === 'menu-page' ? 'note-page' : 'other-page'}`}>
         {currentLocation === 'note-page' && <Note 
           savedNote={savedNote} 
@@ -493,6 +428,11 @@ const Dashboard = ({ authUser }) => {
           setType={setType}
           path={path}
           setPath={setPath}
+        />}
+        {currentLocation === 'test-page' && <Test 
+          note={savedNote}
+          test={test}
+          setTest={setTest}
         />}
         {(currentLocation !== 'note-page' && currentLocation !== 'menu-page') && <Chatbot 
           note={savedNote} 
