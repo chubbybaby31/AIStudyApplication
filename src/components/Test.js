@@ -1,7 +1,16 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import './Test.css'
 
 const Test = ({ note, test, setTest }) => {
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [selectedAnswer, setSelectedAnswer] = useState(null);
+    const [showExplanation, setShowExplanation] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+      getTest();
+    }, []);
+  
 
     const history = [
         {
@@ -51,59 +60,130 @@ const Test = ({ note, test, setTest }) => {
         },
       ];
 
-      const getTest = async () => {
-        try {
-            console.log("started")
-            const options = {
-            method: 'POST',
-            body: JSON.stringify({
-              history: history,
-              message: `Here are the notes: Milton Friedman: A Noteworthy Economist
+    const getTest = async () => {
+      setIsLoading(true)
+      try {
+          console.log("started")
+          const options = {
+          method: 'POST',
+          body: JSON.stringify({
+            history: history,
+            message: `Here are the notes: Milton Friedman: A Noteworthy Economist
 
-              Milton Friedman, a renowned economist, made significant contributions to the field of economics. His work challenged conventional economic thinking and influenced economic policies worldwide.
-              
-              Key Contributions
-              
-              Monetarism: Friedman argued that the money supply is the primary driver of economic activity. He believed that excessive money printing leads to inflation, while controlled money supply promotes economic stability.
-              
-              The Quantity Theory of Money: Friedman emphasized the relationship between the money supply and the price level, arguing that changes in the money supply directly impact inflation.
-              
-              Free Market Capitalism: Friedman was a staunch advocate for free markets, arguing that government intervention in the economy often leads to inefficiencies and distortions.
-              
-              The Natural Rate of Unemployment: Friedman proposed that there exists a natural rate of unemployment, beyond which government intervention is ineffective in lowering unemployment rates.
-              
-              Consumer Choice: Friedman emphasized the importance of consumer choice and individual freedom in economic decision-making.
-              
-              Influence on Policy
-              
-              Friedman's ideas had a profound impact on economic policy. His advocacy for monetarism led to changes in monetary policy, particularly in the United States, with the Federal Reserve adopting a more focused approach to controlling the money supply.
-              
-              His work also influenced the deregulation movement in the 1970s and 1980s, leading to a reduction in government intervention in various industries.
-              
-              Legacy
-              
-              Friedman remains a highly influential figure in economics. His theories continue to be debated and studied, and his work has shaped the thinking of policymakers and economists alike. Now provide ten questions for a test for the student. Ensure your response is only of the 10 questions formatted properly with no additional text or symbols. Also ensure your response does not include quotes around the whole JSON response, it should just be the pure JSON response.`
-            }),
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          };
-          const response = await fetch('http://localhost:8000/gemini', options);
-          const q = await response.text();
-          setTest(JSON.parse(q));
-          console.log(JSON.parse(q))
-        } catch (error) {
-          setTest("");
-          console.log(error)
-        }
-        console.log("done")
-      };
+            Milton Friedman, a renowned economist, made significant contributions to the field of economics. His work challenged conventional economic thinking and influenced economic policies worldwide.
+            
+            Key Contributions
+            
+            Monetarism: Friedman argued that the money supply is the primary driver of economic activity. He believed that excessive money printing leads to inflation, while controlled money supply promotes economic stability.
+            
+            The Quantity Theory of Money: Friedman emphasized the relationship between the money supply and the price level, arguing that changes in the money supply directly impact inflation.
+            
+            Free Market Capitalism: Friedman was a staunch advocate for free markets, arguing that government intervention in the economy often leads to inefficiencies and distortions.
+            
+            The Natural Rate of Unemployment: Friedman proposed that there exists a natural rate of unemployment, beyond which government intervention is ineffective in lowering unemployment rates.
+            
+            Consumer Choice: Friedman emphasized the importance of consumer choice and individual freedom in economic decision-making.
+            
+            Influence on Policy
+            
+            Friedman's ideas had a profound impact on economic policy. His advocacy for monetarism led to changes in monetary policy, particularly in the United States, with the Federal Reserve adopting a more focused approach to controlling the money supply.
+            
+            His work also influenced the deregulation movement in the 1970s and 1980s, leading to a reduction in government intervention in various industries.
+            
+            Legacy
+            
+            Friedman remains a highly influential figure in economics. His theories continue to be debated and studied, and his work has shaped the thinking of policymakers and economists alike. Now provide ten questions for a test for the student. Ensure your response is only of the 10 questions formatted properly with no additional text or symbols. Also ensure your response does not include quotes around the whole JSON response, it should just be the pure JSON response.`
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        };
+        const response = await fetch('http://localhost:8000/gemini', options);
+        const q = await response.text();
+        setTest(JSON.parse(q));
+        console.log(JSON.parse(q))
+      } catch (error) {
+        setTest([]);
+        console.log(error)
+      }
+      setIsLoading(false)
+      console.log("done")
+    };
 
+    const handleAnswerSelection = (choice) => {
+      setSelectedAnswer(choice);
+    };
+  
+    const checkAnswer = () => {
+      if (selectedAnswer !== null) {
+        setShowExplanation(true);
+      }
+    };
+  
+    const nextQuestion = () => {
+      if (currentQuestionIndex < test.length - 1) {
+        setCurrentQuestionIndex(currentQuestionIndex + 1);
+        setSelectedAnswer(null);
+        setShowExplanation(false);
+      }
+    };
+  
     return (
-        <div className="test-container">
-            <button onClick={getTest}>TEST</button>
-        </div>
-    )
-}
-
+      <div className="mcq-container">
+        {isLoading ? (
+          <div className="loader-mcq"></div>
+        ) : !test || test.length === 0 ? (
+          <div className="mcq-invalid">No questions available.</div>
+        ) : (
+          <div className="mcq-valid">
+            <div className="question-prompt-container">
+              <p className="question-prompt">{test[currentQuestionIndex].Question}</p>
+            </div>
+            <div className="choice-container">
+              <ul className="choices">
+                {test[currentQuestionIndex].Choices.map((choice, index) => (
+                  <li key={index}>
+                    <label className={selectedAnswer === choice ? 'selected' : ''}>
+                      <input
+                        type="radio"
+                        name="answer"
+                        checked={selectedAnswer === choice}
+                        onChange={() => handleAnswerSelection(choice)}
+                      />
+                      {choice.text}
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {showExplanation && (
+              <div className="explanation-container">
+                {test[currentQuestionIndex].Choices.map((choice, index) => (
+                  <div key={index} className="explanation">
+                    <p className={`explanation-text ${choice.correct ? 'correct' : 'incorrect'}`}>
+                      {choice.text}: {choice.explanation}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="button-container">
+              {!showExplanation && (
+                <button className="check-answer-button" onClick={checkAnswer} disabled={selectedAnswer === null}>
+                  Check Answer
+                </button>
+              )}
+              {showExplanation && (
+                <button className="next-question-button" onClick={nextQuestion}>
+                  Next Question
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  
+};
+  
 export default Test;
