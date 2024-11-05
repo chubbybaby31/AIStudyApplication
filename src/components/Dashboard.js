@@ -10,18 +10,16 @@ import Lesson from './Lesson'
 import FlashCards from './FlashCards'
 import Menu from './Menu';
 import MoveNotePopup from './MoveNotePopup';
-import Test from './Test';
 
 const Dashboard = ({ authUser }) => {
   const [pdfFile, setPdfFile] = useState(null);
   const [savedNote, setSavedNote] = useState("")
   const [currentQuestion, setCurrentQuestion] = useState("")
   const [answersSelected, setAnswersSelected] = useState([])
-  const [currentLocation, setCurrentLocation] = useState('test-page')
+  const [currentLocation, setCurrentLocation] = useState('menu-page')
   const [summary, setSummary] = useState('')
   const [lesson, setLesson] = useState('')
   const [flashCards, setFlashCards] = useState("")
-  const [test, setTest] = useState("")
   const [currentFlashCard, setCurrentFlashCard] = useState({'term': 'Generate flash cards to see them here...', 'definition': 'Generate flash cards to see them here...'})
   const [lookingAtTerm, setLookingAtTerm] = useState(true)
   const [messageToChat, setMessageToChat] = useState("")
@@ -428,11 +426,6 @@ const Dashboard = ({ authUser }) => {
           setType={setType}
           path={path}
           setPath={setPath}
-        />}
-        {currentLocation === 'test-page' && <Test 
-          note={savedNote}
-          test={test}
-          setTest={setTest}
         />}
         {(currentLocation !== 'note-page' && currentLocation !== 'menu-page') && <Chatbot 
           note={savedNote} 
