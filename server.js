@@ -189,18 +189,19 @@ app.post('/gemini', async (req, res) => {
 app.post('/generate-notes', async (req, res) => {
     const { topic, subtopics, depth } = req.body;
 
-    try {
-        const prompt = `Create a set of notes on the topic of ${topic}, specifically focusing on the subtopics of ${subtopics}. 
-        The notes should be ${depth} in detail (out of basic, intermediat, and advanced).
-        If organization is needed, you can split the notes into subsections with subtitles, but be sure to use HTML tags/formatting to do so instead of using #s and *s.
-        Make sure your response does not at all include * or # and instead uses HTML tags to convey the same formatting. To remind you: <b> or <strong> is used for bolding,
-        <li> is used for a bullet point, and <p> is used for a paragraph. Please use those tags and other HTML tags rather than the #'s and the *'s.
-        Just because I am asking you to format it neatly does not mean you should write a summary. Ensure the response are notes and not a series of large bodies of text.`;
+  try {
+    const prompt = `Create a set of notes on the topic of ${topic}, specifically focusing on the subtopics of ${subtopics}. 
+    The notes should be ${depth} in detail (out of basic, intermediat, and advanced).
+    If organization is needed, you can split the notes into subsections with subtitles, but be sure to use HTML tags/formatting to do so instead of using #s and *s.
+    Make sure your response does not at all include * or # and instead uses HTML tags to convey the same formatting. To remind you: <b> or <strong> is used for bolding,
+    <li> is used for a bullet point, and <p> is used for a paragraph. Please use those tags and other HTML tags rather than the #'s and the *'s.
+    Just because I am asking you to format it neatly does not mean you should write a summary. Ensure the response are notes and not a series of large bodies of text.`;
 
-        const result = await model.generateContent([
-        { text: prompt }
-        ]);
+    const result = await model.generateContent([
+      { text: prompt }
+    ]);
 
+<<<<<<< HEAD
         const notes = result.response.text();
 
         res.json({ notes });
@@ -333,5 +334,15 @@ app.post('/generate-summary', async (req, res) => {
     }
     });
 
+=======
+    const notes = result.response.text();
+
+    res.json({ notes });
+  } catch (error) {
+    console.error('Error generating notes:', error);
+    res.status(500).json({ error: 'An error occurred while generating notes.' });
+  }
+  });
+>>>>>>> parent of 0766512 (Flash cards and started landing page)
 
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`))

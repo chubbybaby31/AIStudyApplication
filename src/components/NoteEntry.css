@@ -1,0 +1,169 @@
+.note-entry-container {
+    background-color: transparent;
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 12px;
+    width: 40vw; /* Ensure this doesn't exceed the parent's width */
+    margin: 5vh auto; /* Add margin to ensure space around the component */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    z-index: 1;
+    position: relative; /* Ensure the container is positioned relative for absolute positioning */
+}
+
+.back-drop-note {
+    background: linear-gradient(135deg, #ffcd93, #ff8383);
+    width: 100%;
+    height: 60vh;
+    z-index: -1;
+    position: absolute;
+    margin-top: 0.5vh;
+    right: 0.15vw;
+    transform: rotate(-8deg);
+    border-radius: 16px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.note-text-box-container {
+    margin: auto;
+    background-color: white;
+    border-radius: 16px;
+    z-index: 100;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative; /* Position relative to contain the loader */
+}
+
+.note-entry-box {
+    padding: 20px;
+    padding-top: 20px;
+    padding-right: 40px; /* Add extra padding to the right to accommodate the loader */
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    resize: none;
+    width: 100%; /* Use full width of the container */
+    height: 60vh;
+    margin: auto;
+    outline: none;
+    background-color: transparent;
+    backdrop-filter: blur(5px);
+    position: relative;
+    z-index: 1;
+}
+
+.loader {
+    width: 20px;
+    aspect-ratio: 1.154;
+    background: repeating-conic-gradient(from -30deg,#ff6a6a 0 60deg,#ffcd93 0 120deg,#ff8383 0 180deg); 
+    animation: l13 1.5s infinite alternate;
+    position: absolute;
+    top: 2.5vh;
+    right: 1.5vw;
+    z-index: 2;
+}
+
+.copy-button {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    padding: 0px; /* Adjust padding for better alignment */
+    background-color: transparent;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 2;
+    box-shadow: 0 0px 0px rgba(0, 0, 0, 0.2);
+}
+
+.copy-icon {
+    width: 25px; /* Adjust size as needed */
+    height: 25px; /* Adjust size as needed */
+    fill: #ffffff;
+    transition: 0.3s ease;
+}
+
+@keyframes l13 {
+    0%,
+    10%  {clip-path: polygon(50% 50%,25% 100%,25% 100%,25% 100%,25% 100%,75% 100%,75% 100%,75% 100%)}
+    33%,
+    43%  {clip-path: polygon(50% 50%,0   50% ,0   50% ,0   50% ,25% 100%,75% 100%,100% 50%,100% 50%)}
+    66%,
+    76%  {clip-path: polygon(50% 50%,25% 0   ,25% 0   ,0   50% ,25% 100%,75% 100%,100% 50%,75%  0  )}
+    95%,
+    100% {clip-path: polygon(50% 50%,75% 0   ,25% 0   ,0   50% ,25% 100%,75% 100%,100% 50%,75%  0  )}
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.toggle-button {
+    position: absolute;
+    bottom: 40px;
+    right: 10px;
+    padding: 0px; /* Adjust padding for better alignment */
+    background-color: transparent;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 2;
+    box-shadow: 0 0px 0px rgba(0, 0, 0, 0.2);
+}
+
+.view-icon {
+    width: 20px; /* Adjust size as needed */
+    height: 20px; /* Adjust size as needed */
+    fill: #000000;
+    transition: 0.3s ease;
+}
+
+.edit-icon {
+    width: 20px; /* Adjust size as needed */
+    height: 20px; /* Adjust size as needed */
+    transition: 0.3s ease;
+}
+
+.toggle-button:hover,
+.copy-button:hover {
+    background-color: transparent;
+    box-shadow: 0 0px 0px rgba(0, 0, 0, 0.2);
+}
+
+.note-display-box {
+    padding: 20px; /* Inner spacing for better readability */
+    padding-right: 40px;
+    border-radius: 8px;
+    background-color: transparent; /* Keep it transparent */
+    font-size: 16px; /* Consistent font size */
+    color: #333; /* Text color */
+    height: 60.5vh; /* Ensure it has the same height as the textarea */
+    overflow-y: auto; /* Enable scrolling if content overflows */
+    
+    /* Additional spacing properties */
+    line-height: 1.6; /* Increase line height for better readability */
+}
+
+.note-display-box h2,
+.note-display-box h3,
+.note-display-box h4 {
+    margin-top: 1.5em; /* Space above headings */
+    margin-bottom: 0.5em; /* Space below headings */
+}
+
+.note-display-box p {
+    margin: 1em 0; /* Space above and below paragraphs */
+}
+
+.note-display-box ul {
+    margin: 1em 0; /* Space above and below lists */
+    padding-left: 20px; /* Indent the list items */
+}
+
+.note-display-box li {
+    margin-bottom: 0.5em; /* Space between list items */
+}
+
+.note-display-box::-webkit-scrollbar,
+.note-entry-box::-webkit-scrollbar {
+    display: none;
+}
