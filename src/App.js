@@ -6,7 +6,7 @@ import LandingPage from './components/LandingPage';
 
 const App = () => {
 
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
   
 
   return (
